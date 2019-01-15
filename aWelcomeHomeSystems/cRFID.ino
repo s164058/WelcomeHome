@@ -1,5 +1,5 @@
-void rfidfunc(MFRC522 mfrc522){// RFID
-if ( ! mfrc522.PICC_IsNewCardPresent()) {
+byte rfidfunc(MFRC522 mfrc522, int debug) { // RFID
+  if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return;
   }
 
@@ -7,25 +7,32 @@ if ( ! mfrc522.PICC_IsNewCardPresent()) {
   if ( ! mfrc522.PICC_ReadCardSerial()) {
     return;
   }
-  Serial.println(F("**Card Detected:**"));
+  if (debug == 1) {
+    Serial.println(F("**Card Detected:**"));
+  }
 
- //-------------------------------------------
+  //-------------------------------------------
 
   for ( uint8_t i = 0; i < 4; i++) {  //
-   readCard[i] = mfrc522.uid.uidByte[i];
-   Serial.print(readCard[i], HEX);
- }
- Serial.println("");
+    readCard[i] = mfrc522.uid.uidByte[i];
+    if (debug == 1) {
+      Serial.print(readCard[i], HEX);
+    }
 
- //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
+  }
+  if (debug == 1) {
+    Serial.println("");
+  }
 
- //-------------------------------------------
 
+  if (debug == 1) {
+    Serial.println(F("\n**End Reading**\n"));
+  }
 
-
- Serial.println(F("\n**End Reading**\n"));
- delay(1000); //change value if you want to read cards faster
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
+
+return readCard;
+  // Returnerer UID
 }

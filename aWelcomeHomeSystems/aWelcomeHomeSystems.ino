@@ -44,10 +44,10 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 byte readCard[4];   // Stores scanned ID read from RFID Module
-
+byte UID;
 
 // WiFi setup:
-#include <ESP8266WiFi.h>
+/*#include <ESP8266WiFi.h>
 
 char ssid[] = SECRET_SSID;   // your network SSID (name)
 char pass[] = SECRET_PASS;   // your network password
@@ -61,7 +61,7 @@ WiFiClient  client;
 
 unsigned long myChannelNumber = SECRET_CH_ID;
 const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
-
+*/
 
 // Sensors setup:
 
@@ -94,11 +94,11 @@ void setup() {
   mfrc522.PCD_Init(); // Start RFID reader
 
   // WiFi setup:
-  WiFi.mode(WIFI_STA);
+  //WiFi.mode(WIFI_STA);
 
 
   // Thingspeak setup:
-  ThingSpeak.begin(client);  // Initialize ThingSpeak
+  //ThingSpeak.begin(client);  // Initialize ThingSpeak
 
 
   // Sensors setup:
@@ -121,5 +121,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+UID = rfidfunc(mfrc522, 1);
+Serial.println(UID);
 }
