@@ -1,4 +1,4 @@
-// RFID
+void rfidfunc(MFRC522 mfrc522){// RFID
 if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return;
   }
@@ -28,3 +28,4 @@ if ( ! mfrc522.PICC_IsNewCardPresent()) {
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
+}
