@@ -1,8 +1,8 @@
 // Std. setup_____________________________________________________________________________________:
 // State definitions
-#define STATE_1 1
-#define STATE_2 2
-#define STATE_3 3
+#define BT 1
+#define WRITE 2
+#define WAIT 3
 
 int currentState;
 int nextState;
@@ -13,6 +13,7 @@ int std_delay = 5; // delay per state in ms
 // Bluetooth setup_____________________________________________________________________________________:
 #include <SoftwareSerial.h>
 SoftwareSerial BTserial(D6, D7); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
+char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
 
 // RFID setup_____________________________________________________________________________________:
 /*
@@ -91,8 +92,8 @@ byte UID;
 void setup() {
   // Std. setup_____________________________________________________________________________________:
   Serial.begin(9600); // Starts a serial connection
-  currentState = STATE_1;
-  nextState = STATE_1;
+  currentState = BT;
+  nextState = BT;
   startTime = millis();   // Save starting time
 
 
@@ -143,28 +144,27 @@ void loop() {
 
   // State Logic
   switch (currentState) {
-    case STATE_1:
-      Serial.println("Im in state 1");
-
-      if (timeElapsed > 1000) {
-        nextState = STATE_2;
+    case BT:
+      Serial.println("Scanning BT");
+      BT_last(BTmac);
+      nextState = WAIT;
+      break;
+    case WAIT:
+      Serial.println("Waiting . . .");
+      if (timeElapsed > 2000) {
+        nextState = WRITE;
       }
       break;
-    case STATE_2:
-      Serial.println("Im in state 2");
-      if (timeElapsed > 1000) {
-        nextState = STATE_3;
-      }
-      break;
-    case STATE_3:
-      Serial.println("Im in state 3");
-      if (timeElapsed > 1000) {
-        nextState = STATE_1;
+    case WRITE:
+      Serial.println(BTmac);
+      if (timeElapsed > 6000) {
+        BT_clearMAC();
+        nextState = BT;
       }
       break;
     default:
       Serial.println("Unknown state!");
-      nextState = STATE_1;
+      nextState = WAIT;
       break;
   }
 

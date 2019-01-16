@@ -78,4 +78,8 @@ void BT_setting() {
   AT("AT+NOTI?", 2);
   AT("AT+NOTP?", 2);
 }
+void BT_clearMAC() {
+  Serial.println("Clear MAC");
+  AT("AT+CLEAR", 0);
+}
 
