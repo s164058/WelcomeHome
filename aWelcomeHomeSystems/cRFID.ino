@@ -1,4 +1,4 @@
-byte rfidfunc(MFRC522 mfrc522, int debug) { // RFID
+byte * rfidfunc(MFRC522 mfrc522, int debug) { // RFID
   if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return;
   }
