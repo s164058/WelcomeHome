@@ -1,5 +1,4 @@
 void BT_setup() {
-  Serial.begin(115200);
   BTserial.begin(9600);
   Serial.println();
   Serial.println("BTserial started at 9600");
@@ -10,10 +9,10 @@ void BT_setup() {
   AT("AT+NAMEWelcomeHome", 0);
   //AT("AT+MODE2", 0); <-- seems to break something
   AT("AT+ROLE0", 0); // slave
-  //AT("AT+SHOW3", 0);
-  //AT("AT+IMME1", 0);
+  AT("AT+SHOW3", 0);
+  AT("AT+IMME0", 0);
   AT("AT+NOTI0", 0); // no notifications
-  //AT("AT+NOTP1", 0);
+  AT("AT+NOTP0", 0);
   AT("AT+RESET", 0);
   Serial.println("Setup complete");
 }
@@ -77,9 +76,10 @@ void BT_setting() {
   AT("AT+IMME?", 2);
   AT("AT+NOTI?", 2);
   AT("AT+NOTP?", 2);
+  AT("AT+RADD?", 1);
 }
 void BT_clearMAC() {
   Serial.println("Clear MAC");
-  AT("AT+CLEAR", 0);
+  AT("AT+CLEAR", 1);
 }
 

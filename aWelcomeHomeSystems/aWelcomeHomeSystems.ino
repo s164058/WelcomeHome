@@ -1,19 +1,24 @@
+#include <SoftwareSerial.h>
+#include <SPI.h>
+#include <MFRC522.h>
+
 // Std. setup_____________________________________________________________________________________:
 // State definitions
 #define BT 1
 #define WRITE 2
 #define WAIT 3
+#define RST_PIN         5           // Configurable, see typical pin layout above
+#define SS_PIN          53          // Configurable, see typical pin layout above
 
 int currentState;
 int nextState;
 unsigned long startTime;
 unsigned long timeElapsed;
-int std_delay = 5; // delay per state in ms
+int std_delay = 100; // delay per state in ms
+bool first;
 
 // Bluetooth setup_____________________________________________________________________________________:
-#include <SoftwareSerial.h>
-SoftwareSerial BTserial(D6, D7); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
-char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
+//SoftwareSerial BTserial(D6, D7); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
 
 // RFID setup_____________________________________________________________________________________:
 /*
@@ -44,13 +49,10 @@ char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
    // VCC -> 3.3V
 */
 
-#include <SPI.h>
-#include <MFRC522.h>
 
-#define RST_PIN         5           // Configurable, see typical pin layout above
-#define SS_PIN          53          // Configurable, see typical pin layout above
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
+
+//MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 byte readCard[4];   // Stores scanned ID read from RFID Module
 byte UID;
@@ -87,23 +89,25 @@ byte UID;
 // LCD setup_____________________________________________________________________________________:
 
 
+SoftwareSerial BTserial(D6, D7); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
 
 
 void setup() {
   // Std. setup_____________________________________________________________________________________:
-  Serial.begin(9600); // Starts a serial connection
+  Serial.begin(115200); // Starts a serial connection
   currentState = BT;
   nextState = BT;
   startTime = millis();   // Save starting time
-
+  first = true;
 
   // Bluetooth setup_____________________________________________________________________________________:
   BT_setup();
+  BT_setting();
 
 
   // RFID setup_____________________________________________________________________________________:
-  SPI.begin(); // Start SPI bus
-  mfrc522.PCD_Init(); // Start RFID reader
+  //SPI.begin(); // Start SPI bus
+  //mfrc522.PCD_Init(); // Start RFID reader
 
   // WiFi setup_____________________________________________________________________________________:
   //WiFi.mode(WIFI_STA);
@@ -131,14 +135,17 @@ void setup() {
 
 }
 
+char BTmac[] = "00xxx0000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
+
 void loop() {
   // put your main code here, to run repeatedly:
-  UID = rfidfunc(mfrc522, 1);
-  Serial.println(UID);
+  //UID = rfidfunc(mfrc522, 1);
+  //Serial.println(UID);
   //Next state?
   if (nextState != currentState) {
     startTime = millis();
     currentState = nextState;
+    first = true;
   }
   timeElapsed = millis() - startTime;
 
@@ -150,15 +157,21 @@ void loop() {
       nextState = WAIT;
       break;
     case WAIT:
-      Serial.println("Waiting . . .");
+      if (first) {
+        Serial.println("Waiting . . .");
+        first = false;
+      }
       if (timeElapsed > 2000) {
         nextState = WRITE;
       }
       break;
     case WRITE:
-      Serial.println(BTmac);
+      if (first) {
+        Serial.print("Found: ");
+        Serial.println(BTmac);
+        first = false;
+      }
       if (timeElapsed > 6000) {
-        BT_clearMAC();
         nextState = BT;
       }
       break;
@@ -167,6 +180,5 @@ void loop() {
       nextState = WAIT;
       break;
   }
-
   delay(std_delay);
 }
