@@ -19,7 +19,7 @@ void LCD_setup()
     lcd.print(" ");
   }
 }
-void LCD_welcome() {
+void LCD_WELCOME() {
   lcd.clear();
   lcd.home();
 
@@ -27,13 +27,13 @@ void LCD_welcome() {
   lcd.print("Welcome Home!!!");
 
   lcd.setCursor(0, 1);
-//  lcd.write(1);
-//  lcd.print(__DATE__);
-//  lcd.print(" ");
+  //  lcd.write(1);
+  //  lcd.print(__DATE__);
+  //  lcd.print(" ");
   lcd.write(2);
   lcd.print(__TIME__);
 }
-void LCD_wrong() {
+void LCD_WRONG() {
   lcd.clear();
   lcd.home();
   lcd.write(6);
@@ -50,5 +50,18 @@ void LCD_NFC() {
   lcd.home();
   lcd.print(" NFC ");
 }
+void LCD_WAIT() {
+  lcd.clear();
+}
+void LCD_MASTER() {
+  lcd.clear();
+  lcd.home();
+  lcd.print(" Scan masterkey ");
 
+}
+void LCD_NEW() {
+  lcd.clear();
+  lcd.home();
+  lcd.print(" Creating user . . .");
 
+}

@@ -21,6 +21,7 @@
 
 #define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
 #define ResetTable 30
+#define motionSensor 35
 
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
@@ -45,6 +46,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 
 // Sensors setup___________________________________________________________________________________
+boolean motion = 0;
 
 
 // EDB setup_____________________________________________________________________________________:
@@ -119,6 +121,7 @@ void setup() {
 
 
   // Sensors setup_____________________________________________________________________________________:
+  pinMode(motionSensor, INPUT_PULLUP);
 
 
 
@@ -138,10 +141,11 @@ void setup() {
 
 char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
 unsigned int UID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
-unsigned int oldUID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
   buttonState = digitalRead(ResetTable);
+  motion = !digitalRead(motionSensor);
+
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
@@ -162,12 +166,10 @@ void loop() {
     case BT:
       Serial.println("--> STATE BT");
       BT_last(BTmac);
-
-
-
       LCD_BT();
-      if (strcmp("000000000000", BTmac) == 0) {
-
+      if (!motion) {
+        nextState = WAIT;
+      } else if (strcmp("000000000000", BTmac) == 0) {
         nextState = NFC;
       } else {
         nextState = WELCOME;
@@ -179,23 +181,16 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC");
-
-        RFIDfunc();
-
         LCD_NFC();
-
         first = false;
       }
       // State
-      if (UID[0] == 0) { //Need timing? [ms]
+      if (!motion) {
+        nextState = WAIT;
+      } else if (UID[0] == 0) { //Need timing? [ms]
         nextState = BT;
       } else {
-        if (RecUID(db, UID)!=0){
-          nextState = NEW_USER;
-        }
-        else {
-          nextState = WELCOME;
-        }
+        nextState = WELCOME;
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -204,6 +199,7 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC_MASTER");
+        LCD_MASTER();
         first = false;
       }
       // State
@@ -217,11 +213,9 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC_NEW");
+        LCD_NEW();
         first = false;
-        
       }
-
-      
       // State
       if (timeElapsed > 1000) { //Need timing? [ms]
         nextState = WAIT;
@@ -232,18 +226,10 @@ void loop() {
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
-        Serial.print("WELCOME! Mac: ");
-        Serial.print(BTmac);
-        Serial.print(" UID: ");
-        PrintUID();
+        Serial.print("WELCOME");
+        Serial.println(BTmac);
+        LCD_WELCOME();
         first = false;
-
-        BT_clearMAC();
-        PrintData(db);
-        setZero();
-
-        LCD_welcome();
-
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
@@ -254,9 +240,10 @@ void loop() {
     case WAIT:
       if (first) {
         Serial.println("--> STATE WAIT");
+        LCD_WAIT();
         first = false;
       }
-      if (timeElapsed > 2000) {
+      if (motion) {
         nextState = BT;
       }
       break;
@@ -266,6 +253,7 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE WRONG");
+        LCD_WRONG();
         first = false;
       }
       // State
@@ -279,8 +267,8 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NEW_USER");
+        LCD_NEW();
         first = false;
-        AddData(db, BTmac, UID, "Test Testen", 0);
       }
       // State
       if (timeElapsed > 1000) { //Need timing? [ms]
