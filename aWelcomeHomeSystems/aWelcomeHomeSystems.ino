@@ -24,31 +24,31 @@ unsigned long timeElapsed;
 int std_delay = 100; // delay per state in ms
 bool first;
 
-// Bluetooth setup_____________________________________________________________________________________:
+// Bluetooth setup_________________________________________________________________________________
 SoftwareSerial BTserial(10, 11); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
 
-// RFID setup_____________________________________________________________________________________:
+// RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 
 
 
-// WiFi setup_____________________________________________________________________________________:
+// WiFi setup______________________________________________________________________________________
 
 
-// Sensors setup_____________________________________________________________________________________:
-
-
-
-// EDB setup_____________________________________________________________________________________:
+// Sensors setup___________________________________________________________________________________
 
 
 
-// Output setup_____________________________________________________________________________________:
+// EDB setup_______________________________________________________________________________________
 
 
 
-// LCD setup_____________________________________________________________________________________:
+// Output setup____________________________________________________________________________________
+
+
+
+// LCD setup_______________________________________________________________________________________
 
 
 
@@ -100,15 +100,10 @@ void setup() {
 
 }
 
-char BTmac[] = "00xxx0000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
-unsigned int UID[4];                // Unsigned integer array, for saving UID to an array(prevents overflow)
+char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
+unsigned int UID = {0,0,0,0};                // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
-<<<<<<< HEAD
-  // put your main code here, to run repeatedly:
-=======
-  
->>>>>>> 12287848d4ed3fe731cb524895560cf731d720af
   //Next state?
   if (nextState != currentState) {
     startTime = millis();
@@ -122,20 +117,27 @@ void loop() {
   switch (currentState) {
     //-----------------------------------------------------------------------------------------------
     case BT:
-      Serial.println("Scanning BT");
+      Serial.println("--> STATE BT");
       BT_last(BTmac);
-      nextState = WAIT;
+      if(strcmp("000000000000", BTmac) == 0){
+        nextState = NFC;
+      }else{
+        nextState = WELCOME;
+      }
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC:
       if (first) {
         // Init of state
         // Runs only one time
+        Serial.println("--> STATE NFC");
         first = false;
       }
       // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
-        nextState = WAIT;
+      if (UID[0] == 0) { //Need timing? [ms]
+        nextState = BT;
+      }else{
+        nextState = WELCOME;
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -143,6 +145,7 @@ void loop() {
       if (first) {
         // Init of state
         // Runs only one time
+        Serial.println("--> STATE NFC_MASTER");
         first = false;
       }
       // State
@@ -155,6 +158,7 @@ void loop() {
       if (first) {
         // Init of state
         // Runs only one time
+        Serial.println("--> STATE NFC_NEW");
         first = false;
       }
       // State
@@ -165,23 +169,25 @@ void loop() {
     //-----------------------------------------------------------------------------------------------
     case WELCOME:
       if (first) {
-        // Init of state
-        // Runs only one time
+        // Init of state. Runs only one time
+        Serial.println("--> STATE WELCOME");
+        Serial.print("WELCOME");
+        Serial.println(BTmac);
         first = false;
       }
       // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
+      if (timeElapsed > 5000) { //Need timing? [ms]
         nextState = WAIT;
       }
       break;
     //-----------------------------------------------------------------------------------------------
     case WAIT:
       if (first) {
-        Serial.println("Waiting . . .");
+        Serial.println("--> STATE WAIT");
         first = false;
       }
       if (timeElapsed > 2000) {
-        nextState = WAIT;
+        nextState = BT;
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -189,6 +195,7 @@ void loop() {
       if (first) {
         // Init of state
         // Runs only one time
+        Serial.println("--> STATE WRONG");
         first = false;
       }
       // State
@@ -201,6 +208,7 @@ void loop() {
       if (first) {
         // Init of state
         // Runs only one time
+        Serial.println("--> STATE NEW_USER");
         first = false;
       }
       // State
@@ -210,7 +218,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     default:
-      Serial.println("Unknown state!");
+      Serial.println("!!! Unknown state !!!");
       nextState = WAIT;
       break;
   }
