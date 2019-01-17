@@ -1,5 +1,5 @@
 void BT_setup() {
-  BTserial.begin(9600);
+  Serial3.begin(9600);
   Serial.println();
   Serial.println("BTserial started at 9600");
   Serial.println("Running setup . . .");
@@ -18,12 +18,12 @@ void BT_setup() {
 }
 
 void BT_last(char * mac) { // give pointer to save MAC in
-  BTserial.write("AT+RADD?");
+  Serial3.write("AT+RADD?");
   delay(100);
   int i = 0;
-  BTserial.find("RADD:");
-  while (BTserial.available()) {
-    mac[i] = BTserial.read();
+  Serial3.find("RADD:");
+  while (Serial3.available()) {
+    mac[i] = Serial3.read();
     i++;
   }
   Serial.println("_________________");
@@ -36,31 +36,31 @@ void AT(char* cmd, bool output) {
   // mod = 2 only output
 
   if (output == 0) {
-    BTserial.write(cmd);
+    Serial3.write(cmd);
     Serial.print(cmd);
-    while (!BTserial.find("OK")) {
+    while (!Serial3.find("OK")) {
       Serial.print('.');
     }
-    while (BTserial.available() > 0 ) {
+    while (Serial3.available() > 0 ) {
       Serial.read();
     }
     Serial.println(" OK");
   } else if (output == 1) {
-    BTserial.write(cmd);
+    Serial3.write(cmd);
     Serial.println(cmd);
     delay(100);
     char c = ' ';                 // char for reading input
-    while (BTserial.available()) {
-      c = BTserial.read();
+    while (Serial3.available()) {
+      c = Serial3.read();
       Serial.write(c);
     }
     Serial.println("");
   } else if (output == 2) {
-    BTserial.write(cmd);
+    Serial3.write(cmd);
     delay(100);
     char c = ' ';                 // char for reading input
-    while (BTserial.available()) {
-      c = BTserial.read();
+    while (Serial3.available()) {
+      c = Serial3.read();
       Serial.write(c);
     }
     Serial.println("");

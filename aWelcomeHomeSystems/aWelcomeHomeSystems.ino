@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <SPI.h>
 #include <MFRC522.h>
 
@@ -31,7 +31,7 @@ int std_delay = 100; // delay per state in ms
 bool first;
 
 // Bluetooth setup_________________________________________________________________________________
-SoftwareSerial BTserial(10, 11); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX)
+//SoftwareSerial BTserial(38, 40); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX) ONLY FOR ESP
 
 // RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
@@ -45,10 +45,6 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 // Sensors setup___________________________________________________________________________________
 
 
-
-<<<<<<< HEAD
-// EDB setup_______________________________________________________________________________________
-=======
 // EDB setup_____________________________________________________________________________________:
 // The read and write handlers for using the EEPROM Library
 void writer(unsigned long address, byte data) {
@@ -68,9 +64,6 @@ struct LogEvent {
   uint8_t Role;
 }
 logEvent;
-
->>>>>>> e11b33424c7c8e2a438dfdfdc9b64bd7c7b8f88d
-
 
 int buttonState = 0;
 
@@ -132,23 +125,15 @@ void setup() {
 }
 
 char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
-unsigned int UID = {0,0,0,0};                // Unsigned integer array, for saving UID to an array(prevents overflow)
+unsigned int UID[] = {0,0,0,0};                // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
-<<<<<<< HEAD
-=======
   buttonState = digitalRead(ResetTable);
     if (buttonState == LOW) {
       db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
       Serial.println("Table reset done!");
     }
 
-<<<<<<< HEAD
-  // put your main code here, to run repeatedly:
-=======
-
->>>>>>> 12287848d4ed3fe731cb524895560cf731d720af
->>>>>>> e11b33424c7c8e2a438dfdfdc9b64bd7c7b8f88d
   //Next state?
   if (nextState != currentState) {
     startTime = millis();
