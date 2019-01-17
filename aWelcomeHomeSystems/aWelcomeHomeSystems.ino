@@ -80,7 +80,7 @@ uint8_t note[8]  = {0x2, 0x3, 0x2, 0xe, 0x1e, 0xc, 0x0};
 uint8_t clock[8] = {0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0};
 uint8_t heart[8] = {0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0};
 uint8_t duck[8]  = {0x0, 0xc, 0x1d, 0xf, 0xf, 0x6, 0x0};
-uint8_t check[8] = {0x0, 0x1 ,0x3, 0x16, 0x1c, 0x8, 0x0};
+uint8_t check[8] = {0x0, 0x1 , 0x3, 0x16, 0x1c, 0x8, 0x0};
 uint8_t cross[8] = {0x0, 0x1b, 0xe, 0x4, 0xe, 0x1b, 0x0};
 uint8_t retarrow[8] = {  0x1, 0x1, 0x5, 0x9, 0x1f, 0x8, 0x4};
 
@@ -131,7 +131,7 @@ void setup() {
 
 
   // LCD setup_____________________________________________________________________________________:
- LCD_setup();
+  LCD_setup();
 
 
 }
@@ -162,12 +162,12 @@ void loop() {
     case BT:
       Serial.println("--> STATE BT");
       BT_last(BTmac);
-<<<<<<< HEAD
-      if (strcmp("000000000000", BTmac) == 0) {
-=======
+
+
+
       LCD_BT();
-      if(strcmp("000000000000", BTmac) == 0){
->>>>>>> a2e9ac1b5b78982ada716f9e1b0cac58ab016d34
+      if (strcmp("000000000000", BTmac) == 0) {
+
         nextState = NFC;
       } else {
         nextState = WELCOME;
@@ -179,11 +179,11 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC");
-<<<<<<< HEAD
+
         RFIDfunc();
-=======
+
         LCD_NFC();
->>>>>>> a2e9ac1b5b78982ada716f9e1b0cac58ab016d34
+
         first = false;
       }
       // State
@@ -229,13 +229,13 @@ void loop() {
         Serial.print(" UID: ");
         PrintUID();
         first = false;
-<<<<<<< HEAD
-        char BTmac[] = "000000000000"; // Reset to default
-        
+
+        BT_clearMAC();
+
         setZero();
-=======
+
         LCD_welcome();
->>>>>>> a2e9ac1b5b78982ada716f9e1b0cac58ab016d34
+
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
