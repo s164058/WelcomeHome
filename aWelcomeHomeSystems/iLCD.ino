@@ -14,11 +14,32 @@ void LCD_setup()
 
   lcd.print("LCD setup . . .");
   lcd.setCursor(0, 1);
-  for(int i = 0: i < 8; i++){
+  for (int i = 0 : i < 8; i++) {
     lcd.write(i);
     lcd.print(" ");
   }
-  
+}
+void LCD_welcome() {
+  lcd.clear();
+  lcd.home();
+
+  lcd.write(3);
+  lcd.print(" Home sweet home ");
+  lcd.write(3);
+
+  lcd.setCursor(0, 1);
+  lcd.write(1);
+  lcd.print(__DATE__);
+  lcd.print(" ");
+  lcd.write(2);
+  lcd.print(__TIME__);
+}
+void LCD_wrong() {
+  lcd.clear();
+  lcd.home();
+  lcd.write(6);
+  lcd.print(" Go away ");
+  lcd.write(6);
 }
 
 
