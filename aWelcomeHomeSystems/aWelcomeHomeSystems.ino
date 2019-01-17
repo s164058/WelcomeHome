@@ -191,10 +191,10 @@ void loop() {
         nextState = BT;
       } else {
         if (RecUID(db, UID)!=0){
-          nextState = WELCOME;
+          nextState = NEW_USER;
         }
         else {
-          nextState = NEW_USER;
+          nextState = WELCOME;
         }
       }
       break;
