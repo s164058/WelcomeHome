@@ -26,8 +26,6 @@ void BT_last(char * mac) { // give pointer to save MAC in
     mac[i] = Serial3.read();
     i++;
   }
-  Serial.println("_________________");
-  Serial.println(mac);
 }
 
 void AT(char* cmd, bool output) {
@@ -76,10 +74,9 @@ void BT_setting() {
   AT("AT+IMME?", 2);
   AT("AT+NOTI?", 2);
   AT("AT+NOTP?", 2);
-  AT("AT+RADD?", 1);
+  AT("AT+ADDR?", 2);
 }
 void BT_clearMAC() {
-  Serial.println("Clear MAC");
   AT("AT+CLEAR", 1);
 }
 
