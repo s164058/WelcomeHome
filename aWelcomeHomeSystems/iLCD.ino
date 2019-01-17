@@ -43,15 +43,16 @@ void LCD_WRONG() {
 void LCD_BT() {
   lcd.clear();
   lcd.home();
-  lcd.print(" BT ");
+  lcd.print(" BT             ");
 }
 void LCD_NFC() {
   lcd.clear();
   lcd.home();
-  lcd.print(" NFC ");
+  lcd.print("            NFC ");
 }
 void LCD_WAIT() {
   lcd.clear();
+  lcd.print("      WAIT      ");
 }
 void LCD_MASTER() {
   lcd.clear();
@@ -62,6 +63,10 @@ void LCD_MASTER() {
 void LCD_NEW() {
   lcd.clear();
   lcd.home();
-  lcd.print(" Creating user . . .");
+  lcd.print(" Scan new key   ");
 
 }
+void LCD_USER() {
+  lcd.clear();
+  lcd.home();
+  lcd.print("Creating user...");
