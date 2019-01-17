@@ -2,6 +2,10 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
+#include "Arduino.h"
+#include <EDB.h>    // Extended Database Library
+#include <EEPROM.h> // Use the Internal Arduino EEPROM as storage
+
 // Std. setup_____________________________________________________________________________________:
 // State definitions
 #define BT 101
@@ -13,6 +17,8 @@
 #define WRONG 107
 #define NEW_USER 108
 
+#define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
+#define ResetTable 30
 
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
@@ -41,7 +47,28 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 
 // EDB setup_____________________________________________________________________________________:
+// The read and write handlers for using the EEPROM Library
+void writer(unsigned long address, byte data) {
+  EEPROM.write(address, data);
+}
+byte reader(unsigned long address) {
+  return EEPROM.read(address);
+}
+// Create an EDB object with the appropriate write and read handlers
+EDB db(&writer, &reader);
 
+// Arbitrary record definition for this table.
+struct LogEvent {
+  char *Mac;
+  unsigned int UID[4];
+  char *name;
+  uint8_t Role;
+}
+logEvent;
+
+
+
+int buttonState = 0;
 
 
 // Output setup_____________________________________________________________________________________:
@@ -87,7 +114,7 @@ void setup() {
 
 
   // EDB setup_____________________________________________________________________________________:
-
+  pinMode(ResetTable, INPUT_PULLUP);
 
 
   // Output setup_____________________________________________________________________________________:
@@ -104,10 +131,16 @@ char BTmac[] = "00xxx0000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
 unsigned int UID[4];                // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
+  buttonState = digitalRead(ResetTable);
+    if (buttonState == LOW) {
+      db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
+      Serial.println("Table reset done!");
+    }
+
 <<<<<<< HEAD
   // put your main code here, to run repeatedly:
 =======
-  
+
 >>>>>>> 12287848d4ed3fe731cb524895560cf731d720af
   //Next state?
   if (nextState != currentState) {
