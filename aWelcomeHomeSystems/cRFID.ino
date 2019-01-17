@@ -72,6 +72,7 @@ void PrintUID() {
   // Print UID to Serial monitor
   for (int i = 0; i < 4; i++) {
     Serial.print(UID[i]);
+    Serial.print("  ");
   }
   Serial.println("");
 }

@@ -38,7 +38,7 @@ bool first;
 
 // RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
-
+unsigned int MASTERKEY[] = {145,  254,  23,  197};
 
 
 
@@ -64,7 +64,7 @@ EDB db(&writer, &reader);
 struct LogEvent {
   char *Mac;
   unsigned int UID[4];
-  char *name;
+  char *Name;
   uint8_t Role;
 }
 logEvent;
@@ -136,20 +136,20 @@ void setup() {
   // LCD setup_____________________________________________________________________________________:
   LCD_setup();
 
-
+  buttonState = digitalRead(ResetTable);
+  if (buttonState == LOW) {
+    db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
+    Serial.println("Table reset done!");
+  }
 }
 
 char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
 unsigned int UID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
-  buttonState = digitalRead(ResetTable);
-  motion = !digitalRead(motionSensor);
-
-  if (buttonState == LOW) {
-    db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
-    Serial.println("Table reset done!");
-  }
+  
+  motion = digitalRead(motionSensor);
+  
 
   //Next state?
   if (nextState != currentState) {
@@ -167,13 +167,22 @@ void loop() {
       Serial.println("--> STATE BT");
       BT_last(BTmac);
       LCD_BT();
-      if (!motion) {
-        nextState = WAIT;
-      } else if (strcmp("000000000000", BTmac) == 0) {
-        nextState = NFC;
+
+      if (strcmp("000000000000", BTmac) == 0) {
+        if (motion) {
+          nextState = NFC;
+        } else {
+          nextState = WAIT;
+        }
+
       } else {
-        nextState = WELCOME;
+        if (RecMac() == 1) {
+          nextState = WELCOME;
+        } else {
+          nextState = NFC_MASTER;
+        }
       }
+
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC:
@@ -184,13 +193,24 @@ void loop() {
         LCD_NFC();
         first = false;
       }
+
+
+      
       // State
       if (!motion) {
         nextState = WAIT;
-      } else if (UID[0] == 0) { //Need timing? [ms]
-        nextState = BT;
       } else {
-        nextState = WELCOME;
+        RFIDfunc();
+        if (UID[0] == 0) { //Need timing? [ms]
+          nextState = BT;
+        } else {
+          if (RecUID(UID) > 0){
+            nextState = WELCOME;
+          } else{
+            nextState = WRONG;
+          }
+
+        }
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -202,10 +222,18 @@ void loop() {
         LCD_MASTER();
         first = false;
       }
-      // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
-        nextState = WAIT;
+      RFIDfunc();
+
+      if (MASTERKEY[0] == UID[0] && MASTERKEY[1] == UID[1] && MASTERKEY[2] == UID[2] && MASTERKEY[3] == UID[3]) {
+        nextState = NFC_NEW;
+        // setZero();
       }
+
+      // State
+      if (timeElapsed > 10000) { //Need timing? [ms]
+        nextState = WRONG;
+      }
+
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC_NEW:
@@ -216,9 +244,13 @@ void loop() {
         LCD_NEW();
         first = false;
       }
+      RFIDfunc();
+      if (!(MASTERKEY[0] == UID[0] && MASTERKEY[1] == UID[1] && MASTERKEY[2] == UID[2] && MASTERKEY[3] == UID[3])) {
+        nextState = NEW_USER;
+      }
       // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
-        nextState = WAIT;
+      if (timeElapsed > 10000) { //Need timing? [ms]
+        nextState = WRONG;
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -226,10 +258,16 @@ void loop() {
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
-        Serial.print("WELCOME");
-        Serial.println(BTmac);
+        Serial.println("WELCOME");
+        Serial.print("MAC: ");
+        Serial.print(BTmac);
+        Serial.print("  UID: ");
+        PrintUID();
+        Serial.println("");
         LCD_WELCOME();
         first = false;
+        BT_clearMAC();
+        setZero();
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
@@ -244,7 +282,8 @@ void loop() {
         first = false;
       }
       if (motion) {
-        nextState = BT;
+        nextState = NFC;
+        PrintData();
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -255,25 +294,26 @@ void loop() {
         Serial.println("--> STATE WRONG");
         LCD_WRONG();
         first = false;
+        BT_clearMAC();
+        setZero();
       }
       // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
+      if (timeElapsed > 3000) { //Need timing? [ms]
         nextState = WAIT;
       }
       break;
     //-----------------------------------------------------------------------------------------------
     case NEW_USER:
-      if (first) {
-        // Init of state
-        // Runs only one time
-        Serial.println("--> STATE NEW_USER");
-        LCD_NEW();
-        first = false;
-      }
-      // State
-      if (timeElapsed > 1000) { //Need timing? [ms]
-        nextState = WAIT;
-      }
+
+      // Init of state
+      // Runs only one time
+      Serial.println("--> STATE NEW_USER");
+      LCD_NEW();
+
+      AddData(BTmac, UID, "Test Testen", 0);
+      nextState = WELCOME;
+
+
       break;
     //-----------------------------------------------------------------------------------------------
     default:

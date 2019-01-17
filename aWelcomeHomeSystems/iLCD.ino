@@ -70,3 +70,4 @@ void LCD_USER() {
   lcd.clear();
   lcd.home();
   lcd.print("Creating user...");
+}
