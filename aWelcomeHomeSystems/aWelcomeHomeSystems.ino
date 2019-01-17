@@ -131,7 +131,7 @@ void setup() {
 
 
   // LCD setup_____________________________________________________________________________________:
- LCD_setup()
+ LCD_setup();
 
 
 }
@@ -161,6 +161,7 @@ void loop() {
     case BT:
       Serial.println("--> STATE BT");
       BT_last(BTmac);
+      LCD_BT();
       if(strcmp("000000000000", BTmac) == 0){
         nextState = NFC;
       }else{
@@ -173,6 +174,7 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC");
+        LCD_NFC();
         first = false;
       }
       // State
@@ -216,6 +218,7 @@ void loop() {
         Serial.print("WELCOME");
         Serial.println(BTmac);
         first = false;
+        LCD_welcome();
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
