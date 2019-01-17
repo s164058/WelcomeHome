@@ -29,20 +29,35 @@
 
 
 int RFIDfunc() {
-  byte readCard[4];   // Stores scanned ID read from RFID Module
-  if ( mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-
-
-    // Read UID from RFID tag, then convert to unsigned integer array by first converting to String then to integer(keep integer values without converting to ASCII)
+  /*if (UID[0] != 0 && UID[1] != 0 && UID[2] != 0 && UID[3] != 0) {
     for ( uint8_t i = 0; i < 4; i++) {
-      readCard[i] = mfrc522.uid.uidByte[i];
-      UID[i] = String(readCard[i]).toInt();
+      oldUID[i] = UID[i];
     }
-    mfrc522.PCD_StopCrypto1(); // Exit/stop communication with device/tag
+  }*/
+
+  byte readCard[4];   // Stores scanned ID read from RFID Module
+
+  if ( mfrc522.PICC_IsNewCardPresent()) {
+    if (mfrc522.PICC_ReadCardSerial()) {
+      // Read UID from RFID tag, then convert to unsigned integer array by first converting to String then to integer(keep integer values without converting to ASCII)
+      for ( uint8_t i = 0; i < 4; i++) {
+        readCard[i] = mfrc522.uid.uidByte[i];
+        //Cur[i] = String(readCard[i]).toInt();
+        //if (oldUID[i] != String(readCard[i]).toInt()) {
+          UID[i] = String(readCard[i]).toInt();
+        /*}
+        else {
+          UID[i] = 0;
+        }*/
+      }
+
+      mfrc522.PCD_StopCrypto1(); // Exit/stop communication with device/tag
+    }
   }
   else {
     //setZero(); // Return UID = 0000, when no tag is identified
   }
+
   return UID;
 }
 
@@ -51,4 +66,12 @@ int setZero() {
     UID[i] = 0;
   }
   return UID;
+}
+
+void PrintUID() {
+  // Print UID to Serial monitor
+  for (int i = 0; i < 4; i++) {
+    Serial.print(UID[i]);
+  }
+  Serial.println("");
 }

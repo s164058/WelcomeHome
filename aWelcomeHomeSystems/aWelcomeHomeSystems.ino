@@ -125,14 +125,15 @@ void setup() {
 }
 
 char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
-unsigned int UID[] = {0,0,0,0};                // Unsigned integer array, for saving UID to an array(prevents overflow)
+unsigned int UID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
+unsigned int oldUID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
   buttonState = digitalRead(ResetTable);
-    if (buttonState == LOW) {
-      db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
-      Serial.println("Table reset done!");
-    }
+  if (buttonState == LOW) {
+    db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
+    Serial.println("Table reset done!");
+  }
 
   //Next state?
   if (nextState != currentState) {
@@ -149,9 +150,9 @@ void loop() {
     case BT:
       Serial.println("--> STATE BT");
       BT_last(BTmac);
-      if(strcmp("000000000000", BTmac) == 0){
+      if (strcmp("000000000000", BTmac) == 0) {
         nextState = NFC;
-      }else{
+      } else {
         nextState = WELCOME;
       }
       break;
@@ -161,12 +162,13 @@ void loop() {
         // Init of state
         // Runs only one time
         Serial.println("--> STATE NFC");
+        RFIDfunc();
         first = false;
       }
       // State
       if (UID[0] == 0) { //Need timing? [ms]
         nextState = BT;
-      }else{
+      } else {
         nextState = WELCOME;
       }
       break;
@@ -201,9 +203,14 @@ void loop() {
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
-        Serial.print("WELCOME");
-        Serial.println(BTmac);
+        Serial.print("WELCOME! Mac: ");
+        Serial.print(BTmac);
+        Serial.print(" UID: ");
+        PrintUID();
         first = false;
+        char BTmac[] = "000000000000"; // Reset to default
+        
+        setZero();
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
