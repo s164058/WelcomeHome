@@ -10,17 +10,25 @@ unsigned int RecMac(EDB db, char *Mac) {
       return rec;
       break;
     }
+    else {
+      int NotValid = 0;
+      return NotValid;
+    }
   }
 }
 
 // Finds number for record which match the UID address
-unsigned int RecMac(EDB db, unsigned int UID[4]) {
+unsigned int RecUID(EDB db, unsigned int UID[4]) {
   unsigned int counter = Users(db);
   for (int rec = 1; rec <= counter; rec++)  {
     db.readRec(rec, EDB_REC logEvent);
     if (logEvent.UID[0] == UID[0] && logEvent.UID[1] == UID[1] && logEvent.UID[2] == UID[2] && logEvent.UID[3] == UID[3]) {
       return rec;
       break;
+    }
+    else {
+      int NotValid = 0;
+      return NotValid;
     }
   }
 }
@@ -59,5 +67,6 @@ void AddData(EDB db, char *Mac, unsigned int UID[4],  char *Name,  uint8_t Role)
     logEvent.name = Name;
     logEvent.Role = Role;
     db.appendRec(EDB_REC logEvent);
+    Serial.println("Added data");
   }
 }

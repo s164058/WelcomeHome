@@ -190,7 +190,12 @@ void loop() {
       if (UID[0] == 0) { //Need timing? [ms]
         nextState = BT;
       } else {
-        nextState = WELCOME;
+        if (RecUID(db, UID)!=0){
+          nextState = WELCOME;
+        }
+        else {
+          nextState = NEW_USER;
+        }
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -213,7 +218,10 @@ void loop() {
         // Runs only one time
         Serial.println("--> STATE NFC_NEW");
         first = false;
+        
       }
+
+      
       // State
       if (timeElapsed > 1000) { //Need timing? [ms]
         nextState = WAIT;
@@ -231,7 +239,7 @@ void loop() {
         first = false;
 
         BT_clearMAC();
-
+        PrintData(db);
         setZero();
 
         LCD_welcome();
@@ -272,6 +280,7 @@ void loop() {
         // Runs only one time
         Serial.println("--> STATE NEW_USER");
         first = false;
+        AddData(db, BTmac, UID, "Test Testen", 0);
       }
       // State
       if (timeElapsed > 1000) { //Need timing? [ms]
