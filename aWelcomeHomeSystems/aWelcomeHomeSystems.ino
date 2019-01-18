@@ -154,6 +154,8 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
+  }else{
+    db.open(0);
   }
 }
 
