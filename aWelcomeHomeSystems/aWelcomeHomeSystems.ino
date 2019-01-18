@@ -26,6 +26,10 @@
 #define RST_PIN         49           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
 
+#define baud 115200
+
+
+
 int currentState;
 int nextState;
 unsigned long startTime;
@@ -38,7 +42,11 @@ bool first;
 
 // RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
-unsigned int MASTERKEY[] = {145,  254,  23,  197};
+
+uint32_t UIDupper = 0;
+uint32_t UIDlower = 0;
+uint32_t Master1 = 145254;
+uint32_t Master2 = 23197;
 
 
 
@@ -62,9 +70,9 @@ EDB db(&writer, &reader);
 
 // Arbitrary record definition for this table.
 struct LogEvent {
-  unsigned int MAC_upp;
-  unsigned int MAC_low;
-  unsigned int UID[4];
+  char *Mac;
+  uint32_t UID_upper_func;
+  uint32_t UID_lower_func;
   char *Name;
   uint8_t Role;
 }
@@ -92,9 +100,11 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 
 
+boolean debug = false; // Show debug messages
+
 void setup() {
   // Std. setup_____________________________________________________________________________________:
-  Serial.begin(115200); // Starts a serial connection
+  Serial.begin(baud); // Starts a serial connection
   currentState = WAIT;
   nextState = WAIT;
   startTime = millis();   // Save starting time
@@ -108,10 +118,9 @@ void setup() {
   // RFID setup_____________________________________________________________________________________:
   SPI.begin(); // Start SPI bus
   mfrc522.PCD_Init(); // Start RFID reader
-  //Serial.println("RFID card starte");
-  //Serial.print(F("Reader "));
-  //Serial.print(F(": "));
-  //mfrc522.PCD_DumpVersionToSerial();
+  Serial.println("RFID card started");
+  Serial.print("RFID reader: ");
+  mfrc522.PCD_DumpVersionToSerial();
 
   // WiFi setup_____________________________________________________________________________________:
   //WiFi.mode(WIFI_STA);
@@ -141,16 +150,11 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
-  }else{
-    db.open(0);
   }
 }
 
-//char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
-unsigned int MAC_low = 0;
-unsigned int MAC_upp = 0;
+char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
 
-unsigned int UID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
 
@@ -171,10 +175,10 @@ void loop() {
     //-----------------------------------------------------------------------------------------------
     case BT:
       Serial.println("--> STATE BT");
-      BT_last(&MAC_low , &MAC_upp);
+      BT_last(BTmac);
       LCD_BT();
 
-      if (MAC_upp == 0 & MAC_low == 0) {
+      if (strcmp("000000000000", BTmac) == 0) {
         if (motion) {
           nextState = NFC;
         } else {
@@ -182,7 +186,7 @@ void loop() {
         }
 
       } else {
-        if (RecMac(MAC_upp, MAC_low) == 1) {
+        if (RecMac() == 1) {
           nextState = WELCOME;
         } else {
           nextState = NFC_MASTER;
@@ -206,11 +210,11 @@ void loop() {
       if (!motion) {
         nextState = WAIT;
       } else {
-        RFIDfunc();
-        if (UID[0] == 0) { //Need timing? [ms]
+        RFIDfunc(mfrc522, debug);
+        if (UIDupper == 0 && UIDlower == 0) { //Need timing? [ms]
           nextState = BT;
         } else {
-          if (RecUID(UID) > 0) {
+          if (RecUID(UIDupper, UIDupper) == true) {
             nextState = WELCOME;
           } else {
             nextState = WRONG;
@@ -228,9 +232,9 @@ void loop() {
         LCD_MASTER();
         first = false;
       }
-      RFIDfunc();
+      RFIDfunc(mfrc522, debug);
 
-      if (MASTERKEY[0] == UID[0] && MASTERKEY[1] == UID[1] && MASTERKEY[2] == UID[2] && MASTERKEY[3] == UID[3]) {
+      if (UIDupper = Master1 && UIDlower = Master2) {
         nextState = NFC_NEW;
         // setZero();
       }
@@ -250,8 +254,8 @@ void loop() {
         LCD_NEW();
         first = false;
       }
-      RFIDfunc();
-      if (!(MASTERKEY[0] == UID[0] && MASTERKEY[1] == UID[1] && MASTERKEY[2] == UID[2] && MASTERKEY[3] == UID[3])) {
+      RFIDfunc(mfrc522, debug);
+      if (!(UIDupper = Master1 && UIDlower = Master2)) {
         nextState = NEW_USER;
       }
       // State
@@ -265,22 +269,20 @@ void loop() {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
         Serial.println("WELCOME");
-        Serial.print("MAC: "); Serial.print(MAC_upp); Serial.print("-"); Serial.println(MAC_low);
+        Serial.print("MAC: ");
+        Serial.print(BTmac);
         Serial.print("  UID: ");
-        PrintUID();
+        PrintUID(UIDupper, UIDlower);
         Serial.println("");
+        LCD_WELCOME();
         first = false;
         BT_clearMAC();
         setZero();
       }
-
-      LCD_WELCOME_NAME(logEvent.Name);
-      delay(3000);
-      LCD_WELCOME_DATA();
-      delay(3000);
-
       // State
-      nextState = WAIT;
+      if (timeElapsed > 5000) { //Need timing? [ms]
+        nextState = WAIT;
+      }
       break;
     //-----------------------------------------------------------------------------------------------
     case WAIT:
@@ -318,7 +320,7 @@ void loop() {
       Serial.println("--> STATE NEW_USER");
       LCD_NEW();
 
-      AddData(MAC_upp, MAC_low, UID, "Test Testen", 0);
+      AddData(BTmac,  UIDupper, UIDlower, "Test Testen", 0);
       nextState = WELCOME;
 
 
