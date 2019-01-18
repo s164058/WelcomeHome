@@ -73,7 +73,6 @@ struct LogEvent {
   uint32_t UID_upp;
   uint32_t UID_low;
   char *Name;
-  uint8_t Role;
 }
 logEvent, current;
 
@@ -109,11 +108,8 @@ void setup() {
   startTime = millis();   // Save starting time
   first = true;           // Variable for init of states
 
-  current.MAC_upp = 0;
-  current.MAC_low = 0;
-  current.UID_upp = 0;
-  current.UID_low = 0;
-  
+  clearAll();
+
   // Bluetooth setup_____________________________________________________________________________________:
   BT_setup();
   BT_setting();
@@ -154,7 +150,7 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
-  }else{
+  } else {
     db.open(0);
   }
 }
@@ -277,9 +273,8 @@ void loop() {
         PrintUID(current.UID_upp, current.UID_low);
         Serial.println("");
         LCD_WELCOME_NAME(logEvent.Name);
+        clearAll();
         first = false;
-        BT_clearMAC();
-        setZero();
       }
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
@@ -305,9 +300,8 @@ void loop() {
         // Runs only one time
         Serial.println("--> STATE WRONG");
         LCD_WRONG();
+        clearAll();
         first = false;
-        BT_clearMAC();
-        setZero();
       }
       // State
       if (timeElapsed > 3000) { //Need timing? [ms]
@@ -335,3 +329,19 @@ void loop() {
   }
   delay(std_delay);
 }
+
+void clearAll() {
+  BT_clearMAC();
+  setZero();
+  current.MAC_upp = 0;
+  current.MAC_low = 0;
+  current.UID_upp = 0;
+  current.UID_low = 0;
+  current.Name = "";
+  logEvent.MAC_upp = 0;
+  logEvent.MAC_low = 0;
+  logEvent.UID_upp = 0;
+  logEvent.UID_low = 0;
+  logEvent.Name = "";
+}
+

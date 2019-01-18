@@ -54,7 +54,6 @@ void PrintData() {
     Serial.print("Mac: "); Serial.print(logEvent.MAC_upp);  Serial.print("-");  Serial.println(logEvent.MAC_low);
     Serial.print("UID: "); Serial.print(logEvent.UID_upp);  Serial.print("-");  Serial.println(logEvent.UID_low);
     Serial.print("Name: "); Serial.println(logEvent.Name);
-    Serial.print("Role: "); Serial.println(logEvent.Role);
   }
   Serial.println("*******************");
 }
@@ -66,7 +65,16 @@ void AddCurrentToDB() {
     Serial.println("Error, No new users can be added!");
   }
   else {
+    current.Name = randomName();
     db.appendRec(EDB_REC current);
     Serial.println("Added data");
   }
 }
+
+char* randomName() {
+  char* first[] = {"Red   ", "Blue  ", "Black ", "Green ", "Pink  "};//6
+  char* last[] = {"Bear    ", "Beaver  ", "Swan    ", "Squirrel", "Panda   "};//8
+
+  return strcat(first[random(5)], last[random(5)]);
+}
+
