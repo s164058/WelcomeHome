@@ -28,51 +28,75 @@
 */
 
 
-int RFIDfunc() {
-  /*if (UID[0] != 0 && UID[1] != 0 && UID[2] != 0 && UID[3] != 0) {
-    for ( uint8_t i = 0; i < 4; i++) {
-      oldUID[i] = UID[i];
-    }
-  }*/
+void RFIDfunc(MFRC522 mfrc522_func, boolean debug_func) {
 
-  byte readCard[4];   // Stores scanned ID read from RFID Module
+  if (debug_func == true) {
+    Serial.println("*******************");
+    Serial.println("RFID");
+  }
 
-  if ( mfrc522.PICC_IsNewCardPresent()) {
-    if (mfrc522.PICC_ReadCardSerial()) {
+  byte readCard[4];                   // Byte array for reading UID in RFID function
+  String str1 = "";                   // String for saving first two bytes of UID
+  String str2 = "";                   // String for saving last two bytes of UID
+
+  if ( mfrc522_func.PICC_IsNewCardPresent() ) {
+    if (mfrc522_func.PICC_ReadCardSerial()) {
+
       // Read UID from RFID tag, then convert to unsigned integer array by first converting to String then to integer(keep integer values without converting to ASCII)
       for ( uint8_t i = 0; i < 4; i++) {
-        readCard[i] = mfrc522.uid.uidByte[i];
-        //Cur[i] = String(readCard[i]).toInt();
-        //if (oldUID[i] != String(readCard[i]).toInt()) {
-          UID[i] = String(readCard[i]).toInt();
-        /*}
+        readCard[i] = mfrc522_func.uid.uidByte[i];
+
+        if (debug_func == true) {
+          str += String(readCard[i]);
+          Serial.print(readCard[i]);
+          Serial.print("-");
+        }
+
+        // Seperate to 2 parts of the total UID
+        if (i < 2) {
+          str1 += String(readCard[i]);
+        }
         else {
-          UID[i] = 0;
-        }*/
+          str2 += String(readCard[i]);
+        }
+
       }
 
-      mfrc522.PCD_StopCrypto1(); // Exit/stop communication with device/tag
+
+      // Convert parts of UID to uint32_t
+      UIDupper = str1.toInt();
+      UIDlower = str2.toInt();
+
+
+      if (debug_func == true) {
+        Serial.println("");
+        Serial.print("UID1: "); Serial.println(UID_upper_func);
+        Serial.print("UID2: "); Serial.println(UIDlower);
+        Serial.println("*******************");
+      }
+
+      mfrc522_func.PCD_StopCrypto1(); // Exit/stop communication with device/tag
     }
+
   }
   else {
-    //setZero(); // Return UID = 0000, when no tag is identified
+    setZero(); // Reset when no card detected
   }
-
-  return UID;
+  return;
 }
 
-int setZero() {
-  for ( uint8_t i = 0; i < 4; i++) {
-    UID[i] = 0;
-  }
-  return UID;
+// Reset UID
+void setZero() {
+  UIDupper = 0;
+  UIDlower = 0;
+  return;
 }
 
-void PrintUID() {
-  // Print UID to Serial monitor
-  for (int i = 0; i < 4; i++) {
-    Serial.print(UID[i]);
-    Serial.print("  ");
-  }
-  Serial.println("");
+// Print UID to Serial monitor
+void PrintUID(uint32_t UID_upper, uint32_t UIDlower) {
+  Serial.println("*******************");
+  Serial.println("PrintUID");
+  Serial.print("UID1: "); Serial.println(UIDupper);
+  Serial.print("UID2: "); Serial.println(UIDlower);
+  Serial.println("*******************");
 }

@@ -25,19 +25,34 @@ unsigned int RecMac() {
 
 }
 
-// Finds number for record which match the UID address
-unsigned int RecUID(unsigned int UID[4]) {
-  unsigned int counter = Users();
-  for (int rec = 1; rec <= counter; rec++)  {
-    db.readRec(rec, EDB_REC logEvent);
-    if (logEvent.UID[0] == UID[0] && logEvent.UID[1] == UID[1] && logEvent.UID[2] == UID[2] && logEvent.UID[3] == UID[3]) {
-      return rec;
-    }
-    else {
-      int NotValid = 0;
-      return NotValid;
+// Check if UID is already in database, if true then it returns valid=true
+boolean RecUID(EDB db_func, uint32_t UID_upper_func_u, uint32_t UID_lower_func_u, boolean debug_func, struct LogEvent) {
+  if (debug_func == true) {
+    Serial.println("*******************");
+    Serial.println("RecUID");
+  }
+  boolean valid = false;
+  unsigned int counter = Users(debug_func);
+  if (counter > 0) {
+    for (int rec = 1; rec <= counter; rec++)  {
+      if (debug_func == true) {
+        Serial.print("Record number: ");
+        Serial.println(rec);
+      }
+
+      db_func.readRec(rec, EDB_REC logEvent);
+      if (logEvent.UID_upper_func == UID_upper_func_u && logEvent.UID_lower_func == UID_lower_func_u) {
+        valid = true;
+        break;
+      }
+
     }
   }
+
+  if (debug_func == true) {
+    Serial.println("*******************");
+  }
+  return valid;
 }
 
 
@@ -57,10 +72,12 @@ void PrintData() {
 }
 
 // Finds number of users
-unsigned int Users() {
-  unsigned int Users = db.count();
-  Serial.print("Record Count: ");
-  Serial.println(db.count());
+unsigned int Users(EDB db_func, boolean debug_func) {
+  unsigned int Users = db_func.count();
+  if (debug_func == true) {
+    Serial.print("Record Count: ");
+    Serial.println(db.count());
+  }
   return Users;
 }
 
@@ -70,11 +87,10 @@ void AddData(char *Mac, unsigned int UID[4], char *Name1, uint8_t Role) {
     Serial.println("Error, No new users can be added!");
   }
   else {
-    
+
     logEvent.Mac = Mac;
-    for ( uint8_t i = 0; i < 4; i++) {
-      logEvent.UID[i] = UID[i];
-    }
+    logEvent.UID_upper_func = UID_upper_func;
+    logEvent.UID_lower_func = UID_lower_func;
     logEvent.Name = Name1;
     logEvent.Role = Role;
     db.appendRec(EDB_REC logEvent);
