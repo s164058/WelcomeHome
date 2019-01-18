@@ -17,7 +17,7 @@ void BT_setup() {
   Serial.println("Setup complete");
 }
 
-unsigned long BT_last(unsigned int * lower, unsigned int * upper) { // give pointers to save MAC in
+unsigned long BT_last() { // give pointers to save MAC in
   Serial3.write("AT+RADD?");
   delay(100);
   int i = 0;
@@ -33,8 +33,8 @@ unsigned long BT_last(unsigned int * lower, unsigned int * upper) { // give poin
     }
     i++;
   }
-  *lower = (int)strtol(low_hex, NULL, 16);
-  *upper = (int)strtol(upp_hex, NULL, 16);
+  current.MAC_low = (int)strtol(low_hex, NULL, 16);
+  current.MAC_upp = (int)strtol(upp_hex, NULL, 16);
 }
 
 void AT(char* cmd, bool output) {

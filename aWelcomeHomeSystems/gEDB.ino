@@ -3,45 +3,34 @@
 
 // Finds number for record which match the Mac address
 unsigned int RecMac() {
-  unsigned int counter = Users();
   int valid = 0;
-  for (int rec1 = 1; rec1 <= counter; rec1++)  {
+  for (int rec1 = 1; rec1 <= db.count(); rec1++)  {
     db.readRec(rec1, EDB_REC logEvent);
-    Serial.println(logEvent.Mac);
-    Serial.println(BTmac);
-
-    if (strcmp(logEvent.Mac, BTmac) == 0) {
+    if (logEvent.MAC_upp == current.MAC_upp && logEvent.MAC_low == current.MAC_low) {
       valid = 1;
-
       break;
     }
 
   }
-
-  Serial.println("Valid=");
-  Serial.println(valid);
   return valid;
-
-
 }
 
 // Check if UID is already in database, if true then it returns valid=true
-boolean RecUID(EDB db_func, uint32_t UID_upper_func_u, uint32_t UID_lower_func_u, boolean debug_func, struct LogEvent) {
-  if (debug_func == true) {
+boolean RecUID() {
+  if (debug == true) {
     Serial.println("*******************");
     Serial.println("RecUID");
   }
   boolean valid = false;
-  unsigned int counter = Users(debug_func);
-  if (counter > 0) {
-    for (int rec = 1; rec <= counter; rec++)  {
-      if (debug_func == true) {
+  if (db.count() > 0) {
+    for (int rec = 1; rec <= db.count(); rec++)  {
+      if (debug == true) {
         Serial.print("Record number: ");
         Serial.println(rec);
       }
 
-      db_func.readRec(rec, EDB_REC logEvent);
-      if (logEvent.UID_upper_func == UID_upper_func_u && logEvent.UID_lower_func == UID_lower_func_u) {
+      db.readRec(rec, EDB_REC logEvent);
+      if (logEvent.UID_upp == current.UID_upp && logEvent.UID_low == current.UID_low) {
         valid = true;
         break;
       }
@@ -49,7 +38,7 @@ boolean RecUID(EDB db_func, uint32_t UID_upper_func_u, uint32_t UID_lower_func_u
     }
   }
 
-  if (debug_func == true) {
+  if (debug == true) {
     Serial.println("*******************");
   }
   return valid;
@@ -60,40 +49,24 @@ boolean RecUID(EDB db_func, uint32_t UID_upper_func_u, uint32_t UID_lower_func_u
 void PrintData() {
   Serial.println("*******************");
   Serial.println("DATABASE");
-  unsigned int counter = Users();
-  for (int rec = 1; rec <= counter; rec++)  {
+  for (int rec = 1; rec <= db.count(); rec++)  {
     db.readRec(rec, EDB_REC logEvent);
-    Serial.print("Mac: "); Serial.println(logEvent.Mac);
-    Serial.print("UID: "); Serial.print(logEvent.UID[0]); Serial.print(logEvent.UID[1]); Serial.print(logEvent.UID[2]); Serial.println(logEvent.UID[3]);
+    Serial.print("Mac: "); Serial.print(logEvent.MAC_upp);  Serial.print("-");  Serial.println(logEvent.MAC_low);
+    Serial.print("UID: "); Serial.print(logEvent.UID_upp);  Serial.print("-");  Serial.println(logEvent.UID_low);
     Serial.print("Name: "); Serial.println(logEvent.Name);
     Serial.print("Role: "); Serial.println(logEvent.Role);
   }
   Serial.println("*******************");
 }
 
-// Finds number of users
-unsigned int Users(EDB db_func, boolean debug_func) {
-  unsigned int Users = db_func.count();
-  if (debug_func == true) {
-    Serial.print("Record Count: ");
-    Serial.println(db.count());
-  }
-  return Users;
-}
 
 // Add data if it's possible
-void AddData(char *Mac, unsigned int UID[4], char *Name1, uint8_t Role) {
-  if (Users() == db.limit()) {
+void AddCurrentToDB() {
+  if (db.count() == db.limit()) {
     Serial.println("Error, No new users can be added!");
   }
   else {
-
-    logEvent.Mac = Mac;
-    logEvent.UID_upper_func = UID_upper_func;
-    logEvent.UID_lower_func = UID_lower_func;
-    logEvent.Name = Name1;
-    logEvent.Role = Role;
-    db.appendRec(EDB_REC logEvent);
+    db.appendRec(EDB_REC current);
     Serial.println("Added data");
   }
 }

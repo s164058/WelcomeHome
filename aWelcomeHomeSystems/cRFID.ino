@@ -28,25 +28,26 @@
 */
 
 
-void RFIDfunc(MFRC522 mfrc522_func, boolean debug_func) {
+void RFIDfunc() {
 
-  if (debug_func == true) {
+  if (debug == true) {
     Serial.println("*******************");
     Serial.println("RFID");
   }
 
   byte readCard[4];                   // Byte array for reading UID in RFID function
+  String str = "";                 
   String str1 = "";                   // String for saving first two bytes of UID
   String str2 = "";                   // String for saving last two bytes of UID
 
-  if ( mfrc522_func.PICC_IsNewCardPresent() ) {
-    if (mfrc522_func.PICC_ReadCardSerial()) {
+  if ( mfrc522.PICC_IsNewCardPresent() ) {
+    if (mfrc522.PICC_ReadCardSerial()) {
 
       // Read UID from RFID tag, then convert to unsigned integer array by first converting to String then to integer(keep integer values without converting to ASCII)
       for ( uint8_t i = 0; i < 4; i++) {
-        readCard[i] = mfrc522_func.uid.uidByte[i];
+        readCard[i] = mfrc522.uid.uidByte[i];
 
-        if (debug_func == true) {
+        if (debug == true) {
           str += String(readCard[i]);
           Serial.print(readCard[i]);
           Serial.print("-");
@@ -64,36 +65,36 @@ void RFIDfunc(MFRC522 mfrc522_func, boolean debug_func) {
 
 
       // Convert parts of UID to uint32_t
-      UIDupper = str1.toInt();
-      UIDlower = str2.toInt();
+      current.UID_upp = str1.toInt();
+      current.UID_low = str2.toInt();
 
 
-      if (debug_func == true) {
+      if (debug == true) {
         Serial.println("");
-        Serial.print("UID1: "); Serial.println(UID_upper_func);
-        Serial.print("UID2: "); Serial.println(UIDlower);
+        Serial.print("UID1: "); Serial.println(current.UID_upp);
+        Serial.print("UID2: "); Serial.println(current.UID_low);
         Serial.println("*******************");
       }
 
-      mfrc522_func.PCD_StopCrypto1(); // Exit/stop communication with device/tag
+      mfrc522.PCD_StopCrypto1(); // Exit/stop communication with device/tag
     }
 
   }
   else {
-    setZero(); // Reset when no card detected
+    //setZero(); // Reset when no card detected
   }
   return;
 }
 
 // Reset UID
 void setZero() {
-  UIDupper = 0;
-  UIDlower = 0;
+  current.UID_upp = 0;
+  current.UID_low = 0;
   return;
 }
 
 // Print UID to Serial monitor
-void PrintUID(uint32_t UID_upper, uint32_t UIDlower) {
+void PrintUID(uint32_t UIDupper, uint32_t UIDlower) {
   Serial.println("*******************");
   Serial.println("PrintUID");
   Serial.print("UID1: "); Serial.println(UIDupper);
