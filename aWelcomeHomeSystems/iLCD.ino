@@ -19,7 +19,7 @@ void LCD_setup()
     lcd.print(" ");
   }
 }
-void LCD_WELCOME() {
+void LCD_WELCOME_NAME(char* name) {
   lcd.clear();
   lcd.home();
 
@@ -27,11 +27,17 @@ void LCD_WELCOME() {
   lcd.print("Welcome Home!!!");
 
   lcd.setCursor(0, 1);
-  //  lcd.write(1);
-  //  lcd.print(__DATE__);
-  //  lcd.print(" ");
-  lcd.write(2);
-  lcd.print(__TIME__);
+  lcd.print(name);
+}
+void LCD_WELCOME_DATA() {
+  lcd.clear();
+  lcd.home();
+
+  lcd.write(3);
+  lcd.print("Show data here ");
+
+  lcd.setCursor(0, 1);
+  lcd.print(" ...and here :)");
 }
 void LCD_WRONG() {
   lcd.clear();

@@ -17,15 +17,24 @@ void BT_setup() {
   Serial.println("Setup complete");
 }
 
-void BT_last(char * mac) { // give pointer to save MAC in
+unsigned long BT_last(unsigned int * lower, unsigned int * upper) { // give pointers to save MAC in
   Serial3.write("AT+RADD?");
   delay(100);
   int i = 0;
+  char upp_hex[] = "000000";
+  char low_hex[] = "000000";
+
   Serial3.find("RADD:");
   while (Serial3.available()) {
-    mac[i] = Serial3.read();
+    if (i < 6) {
+      upp_hex[i] = Serial3.read();
+    } else {
+      low_hex[i-6] = Serial3.read();
+    }
     i++;
   }
+  *lower = (int)strtol(low_hex, NULL, 16);
+  *upper = (int)strtol(upp_hex, NULL, 16);
 }
 
 void AT(char* cmd, bool output) {

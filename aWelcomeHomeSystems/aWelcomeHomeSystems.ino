@@ -23,7 +23,7 @@
 #define ResetTable 30
 #define motionSensor 35
 
-#define RST_PIN         5           // Configurable, see typical pin layout above
+#define RST_PIN         49           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
 
 int currentState;
@@ -62,7 +62,8 @@ EDB db(&writer, &reader);
 
 // Arbitrary record definition for this table.
 struct LogEvent {
-  char *Mac;
+  unsigned int MAC_upp;
+  unsigned int MAC_low;
   unsigned int UID[4];
   char *Name;
   uint8_t Role;
@@ -140,16 +141,21 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
+  }else{
+    db.open(0);
   }
 }
 
-char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
+//char BTmac[] = "000000000000"; //4E4424073BB7 //6CB4F55C9646 //5F7F9129578C
+unsigned int MAC_low = 0;
+unsigned int MAC_upp = 0;
+
 unsigned int UID[] = {0, 0, 0, 0};             // Unsigned integer array, for saving UID to an array(prevents overflow)
 
 void loop() {
-  
+
   motion = digitalRead(motionSensor);
-  
+
 
   //Next state?
   if (nextState != currentState) {
@@ -165,10 +171,10 @@ void loop() {
     //-----------------------------------------------------------------------------------------------
     case BT:
       Serial.println("--> STATE BT");
-      BT_last(BTmac);
+      BT_last(&MAC_low , &MAC_upp);
       LCD_BT();
 
-      if (strcmp("000000000000", BTmac) == 0) {
+      if (MAC_upp == 0 & MAC_low == 0) {
         if (motion) {
           nextState = NFC;
         } else {
@@ -176,7 +182,7 @@ void loop() {
         }
 
       } else {
-        if (RecMac() == 1) {
+        if (RecMac(MAC_upp, MAC_low) == 1) {
           nextState = WELCOME;
         } else {
           nextState = NFC_MASTER;
@@ -195,7 +201,7 @@ void loop() {
       }
 
 
-      
+
       // State
       if (!motion) {
         nextState = WAIT;
@@ -204,9 +210,9 @@ void loop() {
         if (UID[0] == 0) { //Need timing? [ms]
           nextState = BT;
         } else {
-          if (RecUID(UID) > 0){
+          if (RecUID(UID) > 0) {
             nextState = WELCOME;
-          } else{
+          } else {
             nextState = WRONG;
           }
 
@@ -259,20 +265,22 @@ void loop() {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
         Serial.println("WELCOME");
-        Serial.print("MAC: ");
-        Serial.print(BTmac);
+        Serial.print("MAC: "); Serial.print(MAC_upp); Serial.print("-"); Serial.println(MAC_low);
         Serial.print("  UID: ");
         PrintUID();
         Serial.println("");
-        LCD_WELCOME();
         first = false;
         BT_clearMAC();
         setZero();
       }
+
+      LCD_WELCOME_NAME(logEvent.Name);
+      delay(3000);
+      LCD_WELCOME_DATA();
+      delay(3000);
+
       // State
-      if (timeElapsed > 5000) { //Need timing? [ms]
-        nextState = WAIT;
-      }
+      nextState = WAIT;
       break;
     //-----------------------------------------------------------------------------------------------
     case WAIT:
@@ -310,7 +318,7 @@ void loop() {
       Serial.println("--> STATE NEW_USER");
       LCD_NEW();
 
-      AddData(BTmac, UID, "Test Testen", 0);
+      AddData(MAC_upp, MAC_low, UID, "Test Testen", 0);
       nextState = WELCOME;
 
 
