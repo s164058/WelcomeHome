@@ -19,7 +19,7 @@ void LCD_setup()
     lcd.print(" ");
   }
 }
-void LCD_WELCOME_NAME(char* Name) {
+void LCD_WELCOME_NAME() {
   lcd.clear();
   lcd.home();
 
@@ -27,7 +27,8 @@ void LCD_WELCOME_NAME(char* Name) {
   lcd.print("Welcome Home!!!");
 
   lcd.setCursor(0, 1);
-  lcd.print(Name);
+  lcd.print(current.firstName);
+  lcd.print(current.lastName);
 }
 void LCD_WELCOME_DATA() {
   lcd.clear();

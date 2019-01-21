@@ -18,15 +18,14 @@
 #define WAIT 106
 #define WRONG 107
 #define NEW_USER 108
-
-#define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
+// PIN definitions
 #define ResetTable 30
-#define motionSensor 35
-
+#define motionSensor 4
 #define RST_PIN         49           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
-
+// Other definitions
 #define baud 115200
+#define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
 
 
 
@@ -72,7 +71,9 @@ struct LogEvent {
   uint32_t MAC_low;
   uint32_t UID_upp;
   uint32_t UID_low;
-  char *Name;
+  char firstName[8];
+  char lastName[8];
+
 }
 logEvent, current;
 
@@ -272,7 +273,7 @@ void loop() {
         Serial.print("  UID: ");
         PrintUID(current.UID_upp, current.UID_low);
         Serial.println("");
-        LCD_WELCOME_NAME(logEvent.Name);
+        LCD_WELCOME_NAME();
         clearAll();
         first = false;
       }
@@ -337,11 +338,19 @@ void clearAll() {
   current.MAC_low = 0;
   current.UID_upp = 0;
   current.UID_low = 0;
-  current.Name = "";
+  
+
   logEvent.MAC_upp = 0;
   logEvent.MAC_low = 0;
   logEvent.UID_upp = 0;
   logEvent.UID_low = 0;
-  logEvent.Name = "";
+  
+  for(int i = 0; i < 7; i++){
+    logEvent.firstName[i] = "-";
+    logEvent.lastName[i] = "-";
+    current.firstName[i] = "-";
+    current.lastName[i] = "-";
+  }
+
 }
 

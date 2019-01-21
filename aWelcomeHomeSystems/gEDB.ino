@@ -53,7 +53,7 @@ void PrintData() {
     db.readRec(rec, EDB_REC logEvent);
     Serial.print("Mac: "); Serial.print(logEvent.MAC_upp);  Serial.print("-");  Serial.println(logEvent.MAC_low);
     Serial.print("UID: "); Serial.print(logEvent.UID_upp);  Serial.print("-");  Serial.println(logEvent.UID_low);
-    Serial.print("Name: "); Serial.println(logEvent.Name);
+    Serial.print("Name: "); Serial.print(logEvent.firstName);    Serial.print(" ");  Serial.println(logEvent.lastName);
   }
   Serial.println("*******************");
 }
@@ -65,16 +65,22 @@ void AddCurrentToDB() {
     Serial.println("Error, No new users can be added!");
   }
   else {
-    current.Name = randomName();
+    randomName();
     db.appendRec(EDB_REC current);
     Serial.println("Added data");
   }
 }
 
-char* randomName() {
-  char* first[] = {"Red   ", "Blue  ", "Black ", "Green ", "Pink  "};//6
-  char* last[] = {"Bear    ", "Beaver  ", "Swan    ", "Squirrel", "Panda   "};//8
-
-  return strcat(first[random(5)], last[random(5)]);
+void randomName() {
+  //Every name should be 8 char long!! (remember '/0')
+  //align first to the rigth and last to the left
+  char* first[] = {"    Red", "   Blue", "  Black", "  Green", "   Pink", "  White", " Yellow", " Orange", " Purple"};
+  char* last[] =  {"Bear   ", "Beaver ", "Swan   ", "Tiger  ", "Panda  ", "Lion   ", "Owl    ", "Goat   ", "Tuna   "};
+  int firstRnd = random(9);
+  int lastRnd = random(9);
+   for(int i = 0; i < 7; i++){
+    current.firstName[i] = first[firstRnd][i];
+    current.lastName[i] = last[lastRnd][i];
+  }
 }
 
