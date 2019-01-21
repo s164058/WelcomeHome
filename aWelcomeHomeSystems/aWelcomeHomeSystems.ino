@@ -334,20 +334,13 @@ void loop() {
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME_NEW_USER");
-        
-        Serial.print("  UID: ");
-        PrintUID(current.UID_upp, current.UID_low);
-        Serial.println("");
-        
-        
-        
-        LCD_WELCOME_NAME();
-        clearAll();
-        first = false;
 
-        
+        LCD_WELCOME_NEW_CREATED();
+        first = false;
       }
-      // State
+      if (timeElapsed > 2000) { //Need timing? [ms]
+        LCD_WELCOME_NEW_NAME();
+      }
       if (timeElapsed > 5000) { //Need timing? [ms]
         nextState = WAIT;
       }
@@ -377,10 +370,10 @@ void clearAll() {
   logEvent.UID_low = 0;
 
   for (int i = 0; i < 7; i++) {
-    logEvent.firstName[i] = "-";
-    logEvent.lastName[i] = "-";
-    current.firstName[i] = "-";
-    current.lastName[i] = "-";
+    logEvent.firstName[i] = " ";
+    logEvent.lastName[i] = " ";
+    current.firstName[i] = " ";
+    current.lastName[i] = " ";
   }
 
 }
