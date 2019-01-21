@@ -32,6 +32,12 @@
 #define DHTPIN 26
 #define DHTTYPE DHT22
 
+#define Alarmpin 11
+#define Redpin 10
+#define Greenpin 9
+#define Bluepin 8
+
+
 
 int currentState;
 int nextState;
@@ -116,6 +122,12 @@ void setup() {
 
   clearAll();
 
+  pinMode(Redpin, OUTPUT);
+  pinMode(Greenpin, OUTPUT);
+  pinMode(Bluepin, OUTPUT);
+  pinMode(Alarmpin, OUTPUT);
+
+
   // Bluetooth setup_____________________________________________________________________________________:
   BT_setup();
   BT_setting();
@@ -156,9 +168,19 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
+    LED(1, 1, 1, 1);
+    delay(1000);
+    LED(0, 0, 0, 0);
   } else {
     db.open(0);
+    LED(0, 1, 1, 0);
+    delay(1000);
+    LED(0, 0, 0, 0);
   }
+
+
+
+
 }
 
 
@@ -166,6 +188,8 @@ void loop() {
   float hum = dht.readHumidity();
   float temp = dht.readTemperature();
   motion = digitalRead(motionSensor);
+
+
 
 
   //Next state?
@@ -178,12 +202,14 @@ void loop() {
   //UID = rfidfunc(mfrc522, 1);
   //Serial.println(UID);
   // State Logic
+
   switch (currentState) {
     //-----------------------------------------------------------------------------------------------
     case BT:
       Serial.println("--> STATE BT");
       BT_last();
       LCD_BT();
+      LED(0, 0, 1, 0);
 
       if (current.MAC_upp == 0 && current.MAC_low == 0) {
         if (motion) {
@@ -203,6 +229,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC:
+      LED(0, 1, 0, 0);
       if (first) {
         // Init of state
         // Runs only one time
@@ -232,6 +259,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC_MASTER:
+      LED(0, 0, 0, 0);
       if (first) {
         // Init of state
         // Runs only one time
@@ -253,6 +281,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC_NEW:
+      LED(0, 0, 0, 0);
       if (first) {
         // Init of state
         // Runs only one time
@@ -271,6 +300,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WELCOME:
+      LED(1, 0, 0, 0);
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
@@ -281,7 +311,6 @@ void loop() {
         Serial.println("");
         first = false;
       }
-
       if (timeElapsed < 2500) {
         LCD_WELCOME_NAME();
       }
@@ -297,6 +326,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WAIT:
+      LED(0, 0, 0, 0);
       if (first) {
         Serial.println("--> STATE WAIT");
         LCD_WAIT();
@@ -309,6 +339,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WRONG:
+      LED(0, 0, 0, 1);
       if (first) {
         // Init of state
         // Runs only one time
@@ -324,6 +355,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NEW_USER:
+      LED(0, 0, 0, 0);
 
       // Init of state
       // Runs only one time
@@ -336,6 +368,7 @@ void loop() {
 
     //-----------------------------------------------------------------------------------------------
     case WELCOME_NEW_USER:
+      LED(0, 0, 0, 0);
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME_NEW_USER");
@@ -352,6 +385,7 @@ void loop() {
 
     //-----------------------------------------------------------------------------------------------
     default:
+      LED(0, 0, 0, 0);
       Serial.println("!!! Unknown state !!!");
       nextState = WAIT;
       break;
