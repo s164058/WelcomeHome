@@ -73,14 +73,16 @@ void LCD_WRONG() {
   lcd.write(6);
 }
 void LCD_BT() {
-  lcd.clear();
   lcd.home();
-  lcd.print(" BT             ");
+  lcd.print("    Scanning    ");
+  lcd.setCursor(0, 1);
+  lcd.print(".-.-.-.-.-.-.-.-");
 }
 void LCD_NFC() {
-  lcd.clear();
   lcd.home();
-  lcd.print("            NFC ");
+  lcd.print("    Scanning    ");
+  lcd.setCursor(0, 1);
+  lcd.print("-.-.-.-.-.-.-.-.");  
 }
 void LCD_WAIT() {
   lcd.clear();
