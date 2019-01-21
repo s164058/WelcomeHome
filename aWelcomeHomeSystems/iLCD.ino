@@ -28,7 +28,26 @@ void LCD_WELCOME_NAME() {
 
   lcd.setCursor(0, 1);
   lcd.print(current.firstName);
+    lcd.print(" ");
+
   lcd.print(current.lastName);
+}
+void LCD_WELCOME_NEW_CREATED() {
+  lcd.home();
+  lcd.print("    New user    ");
+  
+  lcd.setCursor(0, 1);
+  lcd.print("   created :)   ");
+}
+void LCD_WELCOME_NEW_NAME() {
+  lcd.home();
+  lcd.print("Your codename is");
+  lcd.setCursor(0, 1);
+  lcd.print(current.firstName);
+  lcd.print(" ");
+  lcd.print(current.lastName);
+  lcd.print(" ");
+
 }
 void LCD_WELCOME_DATA() {
   lcd.clear();
