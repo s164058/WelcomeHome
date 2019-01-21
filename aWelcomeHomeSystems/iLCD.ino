@@ -1,28 +1,22 @@
+//This document contains functions for updating the LCD display
 void LCD_setup()
 {
   lcd.begin();
   lcd.backlight();
-  lcd.createChar(0, bell);
-  lcd.createChar(1, note);
+
   lcd.createChar(2, clock);
   lcd.createChar(3, heart);
-  lcd.createChar(4, duck);
-  lcd.createChar(5, check);
   lcd.createChar(6, cross);
-  lcd.createChar(7, retarrow);
-  lcd.home();
 
-  lcd.print("LCD setup . . .");
-  lcd.setCursor(0, 1);
-  for (int i = 0 ; i < 8; i++) {
-    lcd.write(i);
-    lcd.print(" ");
-  }
+  lcd.home();
+  lcd.clear();
+  lcd.print("  Setup . . .   ");
 }
 void LCD_WELCOME_NAME() {
   lcd.home();
   lcd.write(3);
-  lcd.print(" Welcome Home  ");
+  lcd.print(" Welcome Home ");
+  lcd.write(3);
 
   lcd.setCursor(0, 1);
   lcd.print(logEvent.firstName);
@@ -33,9 +27,9 @@ void LCD_WELCOME_NAME() {
 void LCD_WELCOME_NEW_CREATED() {
   lcd.home();
   lcd.print("    New user    ");
-  
+
   lcd.setCursor(0, 1);
-  lcd.print("   created :)   ");
+  lcd.print("    created     ");
 }
 void LCD_WELCOME_NEW_NAME() {
   lcd.home();
@@ -47,15 +41,15 @@ void LCD_WELCOME_NEW_NAME() {
   lcd.print(" ");
 
 }
-void LCD_WELCOME_DATA(float temp, float hum) {
+void LCD_WELCOME_DATA() {
   lcd.home();
-  
+
   lcd.print("Temp:   ");
   lcd.setCursor(7, 0);
   lcd.print(temp);
   lcd.print((char)223);
   lcd.print("C    ");
-  
+
   lcd.setCursor(0, 1);
   lcd.print("Hum:   ");
   lcd.setCursor(7, 1);
@@ -63,11 +57,12 @@ void LCD_WELCOME_DATA(float temp, float hum) {
   lcd.print("%     ");
 }
 void LCD_WRONG() {
-  lcd.clear();
   lcd.home();
   lcd.write(6);
-  lcd.print(" Go away ");
+  lcd.print(" Unauthorized ");
   lcd.write(6);
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
 }
 void LCD_BT() {
   lcd.home();
@@ -79,26 +74,21 @@ void LCD_NFC() {
   lcd.home();
   lcd.print("    Scanning    ");
   lcd.setCursor(0, 1);
-  lcd.print("-.-.-.-.-.-.-.-.");  
+  lcd.print("-.-.-.-.-.-.-.-.");
 }
 void LCD_WAIT() {
   lcd.clear();
-  lcd.print("      WAIT      ");
 }
 void LCD_MASTER() {
-  lcd.clear();
   lcd.home();
   lcd.print(" Scan masterkey ");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
 
 }
 void LCD_NEW() {
-  lcd.clear();
   lcd.home();
-  lcd.print(" Scan new key   ");
-
-}
-void LCD_USER() {
-  lcd.clear();
-  lcd.home();
-  lcd.print("Creating user...");
+  lcd.print("  Scan new key  ");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
 }

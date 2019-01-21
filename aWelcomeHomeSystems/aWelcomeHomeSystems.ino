@@ -1,16 +1,13 @@
-//#include <SoftwareSerial.h>
+// Includes_____________________________________________________________________________________:
 #include <SPI.h>
 #include <MFRC522.h>
-
-#include "Arduino.h"
 #include <EDB.h>    // Extended Database Library
 #include <EEPROM.h> // Use the Internal Arduino EEPROM as storage
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <DHT.h>
 
-#include "DHT.h"
-
-// Std. setup_____________________________________________________________________________________:
+// Definitions_____________________________________________________________________________________:
 // State definitions
 #define BT 101
 #define NFC 102
@@ -48,7 +45,6 @@ int std_delay = 100; // delay per state in ms
 bool first;
 
 // Bluetooth setup_________________________________________________________________________________
-//SoftwareSerial BTserial(38, 40); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX) ONLY FOR ESP
 
 // RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
@@ -56,14 +52,14 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 uint32_t Master_upp = 145254;
 uint32_t Master_low = 23197;
 
-
-
 // WiFi setup______________________________________________________________________________________
 
 
 // Sensors setup___________________________________________________________________________________
 boolean motion = 0;
 DHT dht(DHTPIN, DHTTYPE);
+float hum;
+float temp;
 
 
 // EDB setup_____________________________________________________________________________________:
@@ -97,14 +93,9 @@ int buttonState = 0;
 
 
 // LCD setup_______________________________________________________________________________________
-uint8_t bell[8]  = {0x4, 0xe, 0xe, 0xe, 0x1f, 0x0, 0x4};
-uint8_t note[8]  = {0x2, 0x3, 0x2, 0xe, 0x1e, 0xc, 0x0};
 uint8_t clock[8] = {0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0};
 uint8_t heart[8] = {0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0};
-uint8_t duck[8]  = {0x0, 0xc, 0x1d, 0xf, 0xf, 0x6, 0x0};
-uint8_t check[8] = {0x0, 0x1 , 0x3, 0x16, 0x1c, 0x8, 0x0};
 uint8_t cross[8] = {0x0, 0x1b, 0xe, 0x4, 0xe, 0x1b, 0x0};
-uint8_t retarrow[8] = {  0x1, 0x1, 0x5, 0x9, 0x1f, 0x8, 0x4};
 
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -154,7 +145,6 @@ void setup() {
   pinMode(motionSensor, INPUT_PULLUP);
   dht.begin();
 
-
   // EDB setup_____________________________________________________________________________________:
   pinMode(ResetTable, INPUT_PULLUP);
 
@@ -190,11 +180,9 @@ void setup() {
 
 
 void loop() {
-  float hum = dht.readHumidity();
-  float temp = dht.readTemperature();
+  hum = dht.readHumidity();
+  temp = dht.readTemperature();
   motion = digitalRead(motionSensor);
-
-
 
 
   //Next state?
@@ -204,8 +192,7 @@ void loop() {
     first = true;
   }
   timeElapsed = millis() - startTime;
-  //UID = rfidfunc(mfrc522, 1);
-  //Serial.println(UID);
+
   // State Logic
 
   switch (currentState) {
@@ -222,7 +209,6 @@ void loop() {
         } else {
           nextState = WAIT;
         }
-
       } else {
         if (RecMac() == 1) {
           nextState = WELCOME;
@@ -230,7 +216,6 @@ void loop() {
           nextState = NFC_MASTER;
         }
       }
-
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC:
@@ -242,10 +227,6 @@ void loop() {
         LCD_NFC();
         first = false;
       }
-
-
-
-      // State
       if (!motion) {
         nextState = WAIT;
       } else {
@@ -258,7 +239,6 @@ void loop() {
           } else {
             nextState = WRONG;
           }
-
         }
       }
       break;
@@ -320,7 +300,7 @@ void loop() {
         LCD_WELCOME_NAME();
       }
       else {
-        LCD_WELCOME_DATA(temp, hum);
+        LCD_WELCOME_DATA();
       }
 
       // State
@@ -384,7 +364,8 @@ void loop() {
         LCD_WELCOME_NEW_NAME();
       }
       if (timeElapsed > 5000) { //Need timing? [ms]
-        nextState = WELCOME;
+        clearAll();
+        nextState = WAIT;
       }
       break;
 
@@ -398,25 +379,3 @@ void loop() {
   delay(std_delay);
 }
 
-void clearAll() {
-  BT_clearMAC();
-  setZero();
-  current.MAC_upp = 0;
-  current.MAC_low = 0;
-  current.UID_upp = 0;
-  current.UID_low = 0;
-
-
-  logEvent.MAC_upp = 0;
-  logEvent.MAC_low = 0;
-  logEvent.UID_upp = 0;
-  logEvent.UID_low = 0;
-
-  for (int i = 0; i < 7; i++) {
-    logEvent.firstName[i] = " ";
-    logEvent.lastName[i] = " ";
-    current.firstName[i] = " ";
-    current.lastName[i] = " ";
-  }
-
-}

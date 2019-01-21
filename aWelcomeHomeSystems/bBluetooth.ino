@@ -11,8 +11,8 @@ void BT_setup() {
   AT("AT+ROLE0", 0); // slave
   AT("AT+SHOW3", 0);
   AT("AT+IMME0", 0);
-  AT("AT+NOTI0", 0); // no notifications
-  AT("AT+NOTP0", 0);
+  AT("AT+NOTI1", 0); // no notifications
+  AT("AT+NOTP1", 0);
   AT("AT+RESET", 0);
   Serial.println("Setup complete");
 }
@@ -36,6 +36,7 @@ unsigned long BT_last() { // give pointers to save MAC in
   current.MAC_low = (int)strtol(low_hex, NULL, 16);
   current.MAC_upp = (int)strtol(upp_hex, NULL, 16);
 }
+
 
 void AT(char* cmd, bool output) {
   // mod = 0 output off
