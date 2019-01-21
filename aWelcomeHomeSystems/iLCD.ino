@@ -20,17 +20,15 @@ void LCD_setup()
   }
 }
 void LCD_WELCOME_NAME() {
-  lcd.clear();
   lcd.home();
-
   lcd.write(3);
-  lcd.print("Welcome Home!!!");
+  lcd.print(" Welcome Home  ");
 
   lcd.setCursor(0, 1);
-  lcd.print(current.firstName);
-    lcd.print(" ");
-
-  lcd.print(current.lastName);
+  lcd.print(logEvent.firstName);
+  lcd.print(" ");
+  lcd.print(logEvent.lastName);
+  lcd.print(" ");
 }
 void LCD_WELCOME_NEW_CREATED() {
   lcd.home();
@@ -50,18 +48,17 @@ void LCD_WELCOME_NEW_NAME() {
 
 }
 void LCD_WELCOME_DATA(float temp, float hum) {
-  lcd.clear();
   lcd.home();
   
-  lcd.print("Temp: ");
+  lcd.print("Temp:   ");
   lcd.setCursor(7, 0);
   lcd.print(temp);
   lcd.print((char)223);
   lcd.print("C    ");
   
   lcd.setCursor(0, 1);
-  lcd.print("Hum: ");
-  lcd.setCursor(7, 0);
+  lcd.print("Hum:   ");
+  lcd.setCursor(7, 1);
   lcd.print(hum);
   lcd.print("%     ");
 }

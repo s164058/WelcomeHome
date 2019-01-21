@@ -39,7 +39,6 @@ unsigned long startTime;
 unsigned long timeElapsed;
 int std_delay = 100; // delay per state in ms
 bool first;
-unsigned long ShiftTime;
 
 // Bluetooth setup_________________________________________________________________________________
 //SoftwareSerial BTserial(38, 40); // (SERIAL_RX, SERIAL_TX) CONNECT TO (BT_TX, BT_RX) ONLY FOR ESP
@@ -280,12 +279,10 @@ void loop() {
         Serial.print("  UID: ");
         PrintUID(current.UID_upp, current.UID_low);
         Serial.println("");
-        ShiftTime = millis();
-        clearAll();
         first = false;
       }
 
-      if (ShiftTime < 2500) {
+      if (timeElapsed < 2500) {
         LCD_WELCOME_NAME();
       }
       else {
@@ -295,6 +292,7 @@ void loop() {
       // State
       if (timeElapsed > 5000) { //Need timing? [ms]
         nextState = WAIT;
+        clearAll();
       }
       break;
     //-----------------------------------------------------------------------------------------------
@@ -333,9 +331,7 @@ void loop() {
       LCD_NEW();
 
       AddCurrentToDB();
-      nextState = WELCOME;
-
-
+      nextState = WELCOME_NEW_USER;
       break;
 
     //-----------------------------------------------------------------------------------------------
@@ -343,30 +339,14 @@ void loop() {
       if (first) {
         // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME_NEW_USER");
-<<<<<<< HEAD
-
-        Serial.print("  UID: ");
-        PrintUID(current.UID_upp, current.UID_low);
-        Serial.println("");
-
-
-
-        LCD_WELCOME_NAME();
-        clearAll();
-        first = false;
-
-
-=======
-
         LCD_WELCOME_NEW_CREATED();
         first = false;
       }
       if (timeElapsed > 2000) { //Need timing? [ms]
         LCD_WELCOME_NEW_NAME();
->>>>>>> ccbcf482992dbf712600e7fbe77840ba8175f507
       }
       if (timeElapsed > 5000) { //Need timing? [ms]
-        nextState = WAIT;
+        nextState = WELCOME;
       }
       break;
 
