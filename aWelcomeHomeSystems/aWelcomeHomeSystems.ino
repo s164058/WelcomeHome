@@ -35,13 +35,12 @@
 #define Greenpin 9
 #define Bluepin 8
 
-
-
+//variables
 int currentState;
 int nextState;
 unsigned long startTime;
 unsigned long timeElapsed;
-int std_delay = 100; // delay per state in ms
+static int std_delay = 100; // delay per state in ms
 bool first;
 
 // Bluetooth setup_________________________________________________________________________________
@@ -49,17 +48,17 @@ bool first;
 // RFID setup______________________________________________________________________________________
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
-uint32_t Master_upp = 145254;
-uint32_t Master_low = 23197;
+static uint32_t Master_upp = 145254;
+static uint32_t Master_low = 23197;
 
 // WiFi setup______________________________________________________________________________________
 
 
 // Sensors setup___________________________________________________________________________________
-boolean motion = 0;
 DHT dht(DHTPIN, DHTTYPE);
 float hum;
 float temp;
+boolean motion;
 
 
 // EDB setup_____________________________________________________________________________________:
@@ -85,7 +84,6 @@ struct LogEvent {
 }
 logEvent, current;
 
-int buttonState = 0;
 
 
 // Output setup____________________________________________________________________________________
@@ -156,9 +154,8 @@ void setup() {
   // LCD setup_____________________________________________________________________________________:
   LCD_setup();
 
-  buttonState = digitalRead(ResetTable);
-  if (buttonState == LOW) {
-    db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
+  if (digitalRead(ResetTable) == LOW) {
+    db.create(0, TABLE_SIZE, sizeof(logEvent)); // Truncate the current databased
     Serial.println("Table reset done!");
 
     LED(1, 1, 1, 1);
@@ -180,12 +177,12 @@ void setup() {
 
 
 void loop() {
+  //Sensor update
   hum = dht.readHumidity();
   temp = dht.readTemperature();
   motion = digitalRead(motionSensor);
 
-
-  //Next state?
+  //Has state change since last loop?
   if (nextState != currentState) {
     startTime = millis();
     currentState = nextState;
@@ -193,10 +190,27 @@ void loop() {
   }
   timeElapsed = millis() - startTime;
 
-  // State Logic
-
+  // State Logic (What should we do next?)
   switch (currentState) {
-    //-----------------------------------------------------------------------------------------------
+    /*-----------------------------------------------------------------------------------------------
+      case EXAMPLE:
+      if (first) {
+        Initialization of state.
+        Runs only one time
+        first = false;
+      }
+      State code.
+      What should happen in this state?
+      This code is run as often as possible.
+      Dont include delays here.
+      if (timeElapsed > T) {
+        Go to next state after T ms.
+        This functionality can be used for timeouts
+        nextState = NEXT_EXAMPLE;
+      }
+      break;
+      -----------------------------------------------------------------------------------------------
+    */
     case BT:
       Serial.println("--> STATE BT");
       BT_last();
@@ -221,8 +235,6 @@ void loop() {
     case NFC:
       LED(0, 1, 0, 0);
       if (first) {
-        // Init of state
-        // Runs only one time
         Serial.println("--> STATE NFC");
         LCD_NFC();
         first = false;
@@ -231,7 +243,7 @@ void loop() {
         nextState = WAIT;
       } else {
         RFIDfunc();
-        if (current.UID_upp == 0 && current.UID_low == 0) { //Need timing? [ms]
+        if (current.UID_upp == 0 && current.UID_low == 0) { 
           nextState = BT;
         } else {
           if (RecUID() == true) {
@@ -268,8 +280,6 @@ void loop() {
     case NFC_NEW:
       LED(0, 0, 0, 0);
       if (first) {
-        // Init of state
-        // Runs only one time
         Serial.println("--> STATE NFC_NEW");
         LCD_NEW();
         first = false;
@@ -279,7 +289,7 @@ void loop() {
         nextState = NEW_USER;
       }
       // State
-      if (timeElapsed > 10000) { //Need timing? [ms]
+      if (timeElapsed > 10000) {
         nextState = WRONG;
       }
       break;
@@ -287,10 +297,7 @@ void loop() {
     case WELCOME:
       LED(1, 0, 0, 0);
       if (first) {
-        // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME");
-        Serial.println("WELCOME");
-
         Serial.print("  UID: ");
         PrintUID(current.UID_upp, current.UID_low);
         Serial.println("");
@@ -304,7 +311,7 @@ void loop() {
       }
 
       // State
-      if (timeElapsed > 5000) { //Need timing? [ms]
+      if (timeElapsed > 5000) {
         nextState = WAIT;
         clearAll();
       }
@@ -319,31 +326,25 @@ void loop() {
       }
       if (motion) {
         nextState = NFC;
-        PrintData();
       }
       break;
     //-----------------------------------------------------------------------------------------------
     case WRONG:
       LED(0, 0, 0, 1);
       if (first) {
-        // Init of state
-        // Runs only one time
         Serial.println("--> STATE WRONG");
         LCD_WRONG();
         clearAll();
         first = false;
       }
       // State
-      if (timeElapsed > 3000) { //Need timing? [ms]
+      if (timeElapsed > 3000) {
         nextState = WAIT;
       }
       break;
     //-----------------------------------------------------------------------------------------------
     case NEW_USER:
       LED(0, 0, 0, 0);
-
-      // Init of state
-      // Runs only one time
       Serial.println("--> STATE NEW_USER");
       LCD_NEW();
 
@@ -355,15 +356,15 @@ void loop() {
     case WELCOME_NEW_USER:
       LED(0, 0, 0, 0);
       if (first) {
-        // Init of state. Runs only one time
         Serial.println("--> STATE WELCOME_NEW_USER");
         LCD_WELCOME_NEW_CREATED();
         first = false;
       }
-      if (timeElapsed > 2000) { //Need timing? [ms]
+      if (timeElapsed > 2000) {
         LCD_WELCOME_NEW_NAME();
       }
-      if (timeElapsed > 5000) { //Need timing? [ms]
+      if (timeElapsed > 5000) {
+        PrintData();
         clearAll();
         nextState = WAIT;
       }
