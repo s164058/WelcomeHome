@@ -33,6 +33,7 @@
 #define DHTTYPE DHT22
 
 #define Alarmpin 11
+#define AlarmpinInv 12
 #define Redpin 10
 #define Greenpin 9
 #define Bluepin 8
@@ -126,6 +127,7 @@ void setup() {
   pinMode(Greenpin, OUTPUT);
   pinMode(Bluepin, OUTPUT);
   pinMode(Alarmpin, OUTPUT);
+  pinMode(AlarmpinInv, OUTPUT);
 
 
   // Bluetooth setup_____________________________________________________________________________________:
@@ -168,11 +170,14 @@ void setup() {
   if (buttonState == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Creates new table
     Serial.println("Table reset done!");
+
     LED(1, 1, 1, 1);
     delay(1000);
     LED(0, 0, 0, 0);
+
   } else {
     db.open(0);
+
     LED(0, 1, 1, 0);
     delay(1000);
     LED(0, 0, 0, 0);
