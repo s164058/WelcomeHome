@@ -33,12 +33,18 @@ void LCD_WELCOME_NAME() {
 void LCD_WELCOME_DATA() {
   lcd.clear();
   lcd.home();
-
-  lcd.write(3);
-  lcd.print("Show data here ");
-
+  
+  lcd.print("Temp: ");
+  lcd.setCursor(7, 0);
+  lcd.print(temp);
+  lcd.print((char)223);
+  lcd.print("C    ");
+  
   lcd.setCursor(0, 1);
-  lcd.print(" ...and here :)");
+  lcd.print("Hum: ");
+  lcd.setCursor(7, 0);
+  lcd.print(hum);
+  lcd.print("%     ");
 }
 void LCD_WRONG() {
   lcd.clear();

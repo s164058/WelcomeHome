@@ -8,6 +8,8 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+#include "DHT.h"
+
 // Std. setup_____________________________________________________________________________________:
 // State definitions
 #define BT 101
@@ -18,6 +20,7 @@
 #define WAIT 106
 #define WRONG 107
 #define NEW_USER 108
+#define WELCOME_NEW_USER 109
 // PIN definitions
 #define ResetTable 30
 #define motionSensor 4
@@ -26,7 +29,8 @@
 // Other definitions
 #define baud 115200
 #define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
-
+#define DHTPIN 26
+#define DHTTYPE DHT22
 
 
 int currentState;
@@ -52,6 +56,7 @@ uint32_t Master_low = 23197;
 
 // Sensors setup___________________________________________________________________________________
 boolean motion = 0;
+DHT dht(DHTPIN, DHTTYPE);
 
 
 // EDB setup_____________________________________________________________________________________:
@@ -133,7 +138,7 @@ void setup() {
 
   // Sensors setup_____________________________________________________________________________________:
   pinMode(motionSensor, INPUT_PULLUP);
-
+  dht.begin();
 
 
   // EDB setup_____________________________________________________________________________________:
@@ -158,7 +163,8 @@ void setup() {
 
 
 void loop() {
-
+  float hum = dht.readHumidity();
+  float temp = dht.readTemperature();
   motion = digitalRead(motionSensor);
 
 
@@ -322,6 +328,31 @@ void loop() {
 
 
       break;
+
+    //-----------------------------------------------------------------------------------------------
+    case WELCOME_NEW_USER:
+      if (first) {
+        // Init of state. Runs only one time
+        Serial.println("--> STATE WELCOME_NEW_USER");
+        
+        Serial.print("  UID: ");
+        PrintUID(current.UID_upp, current.UID_low);
+        Serial.println("");
+        
+        
+        
+        LCD_WELCOME_NAME();
+        clearAll();
+        first = false;
+
+        
+      }
+      // State
+      if (timeElapsed > 5000) { //Need timing? [ms]
+        nextState = WAIT;
+      }
+      break;
+
     //-----------------------------------------------------------------------------------------------
     default:
       Serial.println("!!! Unknown state !!!");
@@ -338,14 +369,14 @@ void clearAll() {
   current.MAC_low = 0;
   current.UID_upp = 0;
   current.UID_low = 0;
-  
+
 
   logEvent.MAC_upp = 0;
   logEvent.MAC_low = 0;
   logEvent.UID_upp = 0;
   logEvent.UID_low = 0;
-  
-  for(int i = 0; i < 7; i++){
+
+  for (int i = 0; i < 7; i++) {
     logEvent.firstName[i] = "-";
     logEvent.lastName[i] = "-";
     current.firstName[i] = "-";
@@ -353,4 +384,3 @@ void clearAll() {
   }
 
 }
-
