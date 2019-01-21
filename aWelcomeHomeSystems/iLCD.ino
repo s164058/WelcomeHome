@@ -49,7 +49,7 @@ void LCD_WELCOME_NEW_NAME() {
   lcd.print(" ");
 
 }
-void LCD_WELCOME_DATA() {
+void LCD_WELCOME_DATA(float temp, float hum) {
   lcd.clear();
   lcd.home();
   
