@@ -26,9 +26,9 @@
 #define DHT_PIN 26
 #define Alarm_PIN 11
 #define AlarmInv_PIN 12
-#define Red_PIN 10
+#define Red_PIN 8
 #define Green_PIN 9
-#define Blue_PIN 8
+#define Blue_PIN 10
 
 // Other definitions
 #define baud 115200       //Arduino communicationspeed
