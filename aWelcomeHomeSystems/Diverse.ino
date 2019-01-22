@@ -21,11 +21,11 @@ void clearAll() {
 }
 
 void LED(boolean Red, boolean Green, boolean Blue, boolean Alarm) {
-  digitalWrite(Redpin, Red);
-  digitalWrite(Greenpin, Green);
-  digitalWrite(Bluepin, Blue);
-  digitalWrite(Alarmpin, Alarm);
-  digitalWrite(AlarmpinInv, !Alarm);
+  digitalWrite(Red_PIN, Red);
+  digitalWrite(Green_PIN, Green);
+  digitalWrite(Blue_PIN, Blue);
+  digitalWrite(Alarm_PIN, Alarm);
+  digitalWrite(AlarmInv_PIN, !Alarm);
 }
 
 void randomName() {

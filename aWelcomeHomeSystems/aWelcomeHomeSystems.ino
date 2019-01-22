@@ -1,11 +1,11 @@
 // Includes_____________________________________________________________________________________:
 #include <SPI.h>
 #include <MFRC522.h>
-#include <EDB.h>    // Extended Database Library
-#include <EEPROM.h> // Use the Internal Arduino EEPROM as storage
+#include <EDB.h>                // Extended Database Library
+#include <EEPROM.h>             // Use the Internal Arduino EEPROM as storage
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <DHT.h>
+#include <LiquidCrystal_I2C.h>  //I2C communication LCD display
+#include <DHT.h>                //Sensor libary for DHT-22
 
 // Definitions_____________________________________________________________________________________:
 // State definitions
@@ -19,21 +19,23 @@
 #define NEW_USER 108
 #define WELCOME_NEW_USER 109
 // PIN definitions
-#define ResetTable 30
-#define motionSensor 4
+#define ResetTable_PIN 30
+#define MotionSensor_PIN 4
 #define RST_PIN         49           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
+#define DHT_PIN 26
+#define Alarm_PIN 11
+#define AlarmInv_PIN 12
+#define Red_PIN 10
+#define Green_PIN 9
+#define Blue_PIN 8
+
 // Other definitions
-#define baud 115200
+#define baud 115200       //Arduino communicationspeed
 #define TABLE_SIZE 512 // Arduino 168 or greater, can be setted higher for MEGA
-#define DHTPIN 26
 #define DHTTYPE DHT22
 
-#define Alarmpin 11
-#define AlarmpinInv 12
-#define Redpin 10
-#define Greenpin 9
-#define Bluepin 8
+
 
 //variables
 int currentState;
@@ -55,7 +57,7 @@ static uint32_t Master_low = 23197;
 
 
 // Sensors setup___________________________________________________________________________________
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHT_PIN, DHTTYPE);
 float hum;
 float temp;
 boolean motion;
@@ -112,11 +114,11 @@ void setup() {
 
   clearAll();
 
-  pinMode(Redpin, OUTPUT);
-  pinMode(Greenpin, OUTPUT);
-  pinMode(Bluepin, OUTPUT);
-  pinMode(Alarmpin, OUTPUT);
-  pinMode(AlarmpinInv, OUTPUT);
+  pinMode(Red_PIN, OUTPUT);
+  pinMode(Green_PIN, OUTPUT);
+  pinMode(Blue_PIN,OUTPUT);
+  pinMode(Alarm_PIN, OUTPUT);
+  pinMode(AlarmInv_PIN, OUTPUT);
 
 
   // Bluetooth setup_____________________________________________________________________________________:
@@ -140,11 +142,11 @@ void setup() {
 
 
   // Sensors setup_____________________________________________________________________________________:
-  pinMode(motionSensor, INPUT_PULLUP);
+  pinMode(MotionSensor_PIN, INPUT_PULLUP);
   dht.begin();
 
   // EDB setup_____________________________________________________________________________________:
-  pinMode(ResetTable, INPUT_PULLUP);
+  pinMode(ResetTable_PIN, INPUT_PULLUP);
 
 
   // Output setup_____________________________________________________________________________________:
@@ -154,7 +156,7 @@ void setup() {
   // LCD setup_____________________________________________________________________________________:
   LCD_setup();
 
-  if (digitalRead(ResetTable) == LOW) {
+  if (digitalRead(ResetTable_PIN) == LOW) {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Truncate the current databased
     Serial.println("Table reset done!");
 
@@ -180,7 +182,7 @@ void loop() {
   //Sensor update
   hum = dht.readHumidity();
   temp = dht.readTemperature();
-  motion = digitalRead(motionSensor);
+  motion = digitalRead(MotionSensor_PIN);
 
   //Has state change since last loop?
   if (nextState != currentState) {
@@ -243,7 +245,7 @@ void loop() {
         nextState = WAIT;
       } else {
         RFIDfunc();
-        if (current.UID_upp == 0 && current.UID_low == 0) { 
+        if (current.UID_upp == 0 && current.UID_low == 0) {
           nextState = BT;
         } else {
           if (RecUID() == true) {
