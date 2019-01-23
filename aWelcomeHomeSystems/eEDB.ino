@@ -1,7 +1,7 @@
-// Extended Database - Save on EEPROM or SD
+// Extended Database - Store data on EEPROM
 
 
-// Finds number for record which match the Mac address
+// Check if Mac address is already in database, if true then it returns valid=true
 unsigned int RecMac() {
   int valid = 0;
   for (int rec1 = 1; rec1 <= db.count(); rec1++)  {
@@ -70,4 +70,3 @@ void AddCurrentToDB() {
     Serial.println("Added data");
   }
 }
-
