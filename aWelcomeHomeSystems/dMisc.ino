@@ -31,10 +31,10 @@ void LED(boolean Red, boolean Green, boolean Blue, boolean Alarm) {
 void randomName() {
   //Every name should be 8 char long!! (remember '/0')
   //align first to the rigth and last to the left
-  char* first[] = {"    Red", "   Blue", "  Black", "  Green", "   Pink", "  White", " Yellow", " Orange", " Purple"};
-  char* last[] =  {"Bear   ", "Beaver ", "Swan   ", "Tiger  ", "Panda  ", "Lion   ", "Owl    ", "Goat   ", "Tuna   "};
-  int firstRnd = (random(0,2000)*db.count())%9;
-  int lastRnd = (random(0,2000)*db.count())%9;
+  char* first[] = {"    Red", "   Blue", "  Black", "  Green", "   Pink", "  White", " Yellow", " Orange", " Purple", "   Tiny", "    Big", "  Funky", "  Fancy"};
+  char* last[] =  {"Bear   ", "Beaver ", "Swan   ", "Tiger  ", "Panda  ", "Lion   ", "Owl    ", "Goat   ", "Tuna   ", "Monkey ", "Snake  ", "Dolphin", "Spider " };
+  int firstRnd = (random(0,10000)*db.count())%13;
+  int lastRnd = (random(0,10000)*db.count())%13;
    for(int i = 0; i < 7; i++){
     current.firstName[i] = first[firstRnd][i];
     current.lastName[i] = last[lastRnd][i];
