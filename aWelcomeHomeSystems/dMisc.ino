@@ -1,3 +1,5 @@
+
+// Set MAC, UID and name to 0/empty
 void clearAll() {
   BT_clearMAC();
   setZero();
@@ -20,6 +22,7 @@ void clearAll() {
   }
 }
 
+// Function to set LED/Alarm output
 void LED(boolean Red, boolean Green, boolean Blue, boolean Alarm) {
   digitalWrite(Red_PIN, Red);
   digitalWrite(Green_PIN, Green);
@@ -28,6 +31,7 @@ void LED(boolean Red, boolean Green, boolean Blue, boolean Alarm) {
   digitalWrite(AlarmInv_PIN, !Alarm);
 }
 
+// Function to choose a random name
 void randomName() {
   //Every name should be 8 char long!! (remember '/0')
   //align first to the rigth and last to the left

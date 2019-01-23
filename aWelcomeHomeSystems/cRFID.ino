@@ -63,11 +63,9 @@ void RFIDfunc() {
 
       }
 
-
       // Convert parts of UID to uint32_t
       current.UID_upp = str1.toInt();
       current.UID_low = str2.toInt();
-
 
       if (debug == true) {
         Serial.println("");
@@ -79,9 +77,6 @@ void RFIDfunc() {
       mfrc522.PCD_StopCrypto1(); // Exit/stop communication with device/tag
     }
 
-  }
-  else {
-    //setZero(); // Reset when no card detected
   }
   return;
 }

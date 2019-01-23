@@ -116,7 +116,7 @@ void setup() {
 
   pinMode(Red_PIN, OUTPUT);
   pinMode(Green_PIN, OUTPUT);
-  pinMode(Blue_PIN,OUTPUT);
+  pinMode(Blue_PIN, OUTPUT);
   pinMode(Alarm_PIN, OUTPUT);
   pinMode(AlarmInv_PIN, OUTPUT);
 
@@ -160,16 +160,18 @@ void setup() {
     db.create(0, TABLE_SIZE, sizeof(logEvent)); // Truncate the current databased
     Serial.println("Table reset done!");
 
-    LED(1, 1, 1, 1);
+    LED(1, 0, 0, 1); // Indicate when a table is loaded, red LED(RGB) and alarm LED
     delay(1000);
-    LED(0, 0, 0, 0);
+    LED(0, 0, 0, 0);  // Turn LEDs off
 
   } else {
     db.open(0);
+    Serial.println("Table load done!");
+    PrintData();
 
-    LED(0, 1, 1, 0);
+    LED(1, 0, 0, 0);  // Indicate when a table is loaded, red LED(RGB)
     delay(1000);
-    LED(0, 0, 0, 0);
+    LED(0, 0, 0, 0);  // Turn LEDs off
   }
 
 
@@ -217,7 +219,7 @@ void loop() {
       Serial.println("--> STATE BT");
       BT_last();
       LCD_BT();
-      LED(0, 0, 1, 0);
+      LED(0, 0, 1, 0); // Blue LED(RGB) for bluetooth state
 
       if (current.MAC_upp == 0 && current.MAC_low == 0) {
         if (motion) {
@@ -235,7 +237,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC:
-      LED(0, 1, 0, 0);
+      LED(0, 1, 0, 0); // Green LED(RGB) for NFC state
       if (first) {
         Serial.println("--> STATE NFC");
         LCD_NFC();
@@ -258,7 +260,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC_MASTER:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0); // Turn LEDs off
       if (first) {
         // Init of state
         // Runs only one time
@@ -280,15 +282,25 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NFC_NEW:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0); // Turn LEDs off
       if (first) {
         Serial.println("--> STATE NFC_NEW");
         LCD_NEW();
         first = false;
       }
       RFIDfunc();
+      LCD_NEW();
       if (!(current.UID_upp == Master_upp && current.UID_low == Master_low)) {
-        nextState = NEW_USER;
+
+        if (RecUID() == false) {
+          nextState = NEW_USER;
+        }
+        else {
+          LCD_NFC_NOT_UNIQUE();
+          current.UID_upp = Master_upp;
+          current.UID_low = Master_low;
+
+        }
       }
       // State
       if (timeElapsed > 10000) {
@@ -297,11 +309,10 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WELCOME:
-      LED(1, 0, 0, 0);
+      LED(0, 1, 1, 0); // Turn blue and green LED(RGB) on
       if (first) {
         Serial.println("--> STATE WELCOME");
-        Serial.print("  UID: ");
-        PrintUID(current.UID_upp, current.UID_low);
+        //PrintUID(current.UID_upp, current.UID_low);
         Serial.println("");
         first = false;
       }
@@ -320,7 +331,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WAIT:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0);  // Turn LEDs off
       if (first) {
         Serial.println("--> STATE WAIT");
         LCD_WAIT();
@@ -332,7 +343,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case WRONG:
-      LED(0, 0, 0, 1);
+      LED(0, 0, 0, 1);  // Set Alarm LED high
       if (first) {
         Serial.println("--> STATE WRONG");
         LCD_WRONG();
@@ -346,7 +357,7 @@ void loop() {
       break;
     //-----------------------------------------------------------------------------------------------
     case NEW_USER:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0);  // Turn LEDs off
       Serial.println("--> STATE NEW_USER");
       LCD_NEW();
 
@@ -356,7 +367,7 @@ void loop() {
 
     //-----------------------------------------------------------------------------------------------
     case WELCOME_NEW_USER:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0);  // Turn LEDs off
       if (first) {
         Serial.println("--> STATE WELCOME_NEW_USER");
         LCD_WELCOME_NEW_CREATED();
@@ -372,13 +383,13 @@ void loop() {
       }
       break;
 
+
     //-----------------------------------------------------------------------------------------------
     default:
-      LED(0, 0, 0, 0);
+      LED(0, 0, 0, 0);  // Turn LEDs off
       Serial.println("!!! Unknown state !!!");
       nextState = WAIT;
       break;
   }
   delay(std_delay);
 }
-

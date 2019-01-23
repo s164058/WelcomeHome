@@ -92,3 +92,9 @@ void LCD_NEW() {
   lcd.setCursor(0, 1);
   lcd.print("                ");
 }
+void LCD_NFC_NOT_UNIQUE() {
+  lcd.home();
+  lcd.print("RFID Not unique!");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+}
