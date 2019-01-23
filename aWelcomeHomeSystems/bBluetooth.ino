@@ -11,8 +11,8 @@ void BT_setup() {
   AT("AT+ROLE0", 0); // slave
   AT("AT+SHOW3", 0);
   AT("AT+IMME0", 0);
-  AT("AT+NOTI1", 0); // no notifications
-  AT("AT+NOTP1", 0);
+  AT("AT+NOTI0", 0); // no notifications
+  AT("AT+NOTP0", 0);
   AT("AT+RESET", 0);
   Serial.println("Setup complete");
 }
@@ -89,4 +89,3 @@ void BT_setting() {
 void BT_clearMAC() {
   AT("AT+CLEAR", 1);
 }
-
