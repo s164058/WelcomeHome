@@ -246,8 +246,8 @@ void loop() {
       if (!motion) {
         nextState = WAIT;
       } else {
-        lcd.backlight();
-        lcd.display();
+        lcd.backlight(); // Turn on backlight, when waking from wait
+        lcd.display();  // Turn on display, when waking from wait
         RFIDfunc();
         if (current.UID_upp == 0 && current.UID_low == 0) {
           nextState = BT;
@@ -343,8 +343,8 @@ void loop() {
         nextState = NFC;
       }
       else{
-        lcd.noBacklight();
-        lcd.noDisplay();
+        lcd.noBacklight(); // Turn off backlight
+        lcd.noDisplay();   // Turn off backlight
       }
       break;
     //-----------------------------------------------------------------------------------------------
